@@ -9,6 +9,8 @@ from research_support import augment_questions, load_research, review_memo
 
 POINT_PREFIXES = ("-", "*", "+")
 SCRIPTURE_LABELS = ("본문", "성경본문", "성구", "말씀")
+# 나눔 질문에서 제외할 메타데이터 접두사 (개요 헤더 정보)
+METADATA_PREFIXES = ("제목:", "본문:", "메인 아이디어:", "메인아이디어:", "성경본문:", "성구:", "설교 제목:")
 
 
 def read_text(path: Path) -> str:
@@ -95,6 +97,10 @@ def extract_points(lines: list[str]) -> list[str]:
         if not point:
             continue
 
+        # 메타데이터 항목(제목:, 본문: 등)은 나눔 질문에서 제외
+        if any(point.startswith(p) for p in METADATA_PREFIXES):
+            continue
+
         fallback_points.append(point)
         if is_outline_section(current_heading):
             scoped_points.append(point)
@@ -115,7 +121,7 @@ def build_observation_questions(points: list[str]) -> list[str]:
     if not points:
         return [
             "본문에서 반복되거나 강조되는 표현은 무엇인가요?",
-            "예수님이 니고데모에게 먼저 짚으시는 문제는 무엇인가요?",
+            "예수님의 말씀이나 행동 중 가장 인상적인 장면은 무엇인가요?",
         ]
 
     return [f"'{point}'와 연결되는 본문 관찰은 무엇인가요?" for point in points]
@@ -124,8 +130,8 @@ def build_observation_questions(points: list[str]) -> list[str]:
 def build_interpretation_questions(points: list[str]) -> list[str]:
     if not points:
         return [
-            "이 본문이 우리에게 말하는 새 생명의 핵심은 무엇인가요?",
-            "왜 예수님은 니고데모의 종교적 익숙함을 먼저 흔드셨을까요?",
+            "이 본문이 말하는 복음의 핵심은 무엇인가요?",
+            "예수님이 이 말씀을 하신 이유는 무엇일까요?",
         ]
 
     return [f"'{point}'가 왜 중요한지 본문 흐름 안에서 설명해 보세요." for point in points]
@@ -134,8 +140,8 @@ def build_interpretation_questions(points: list[str]) -> list[str]:
 def build_application_questions(points: list[str]) -> list[str]:
     if not points:
         return [
-            "내가 신앙의 익숙함으로 대신하고 있는 부분은 무엇인가요?",
-            "이번 주에 성령의 역사에 더 의지하기 위해 바꿀 한 가지는 무엇인가요?",
+            "이 본문이 오늘 나의 삶에서 도전하는 부분은 무엇인가요?",
+            "이번 주에 한 가지 순종으로 정한다면 무엇을 하시겠습니까?",
         ]
 
     return [f"'{point}'를 이번 주 삶에 적용한다면 어떤 행동 변화가 필요할까요?" for point in points]
