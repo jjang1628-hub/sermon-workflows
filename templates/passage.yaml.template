@@ -1,0 +1,26 @@
+# passage.yaml — Logos-Max Sermon Workflow v2
+# 새 본문 시작 시 이 템플릿을 복사하거나 create_passage.py를 사용하십시오.
+
+book: "{{BOOK_EN}}"           # e.g. John, Romans, Exodus
+book_korean: "{{BOOK_KO}}"    # e.g. 요한복음, 로마서
+book_slug: "{{BOOK_SLUG}}"    # e.g. jn, ro, ex
+passage: "{{PASSAGE}}"        # e.g. 13:14
+passage_slug: "{{PASSAGE_SLUG}}"  # e.g. 13-14
+context_range: "{{CONTEXT}}"  # e.g. 13:1-17
+
+# 장르: gospel | epistle | psalm_wisdom | ot_narrative | prophetic | law_ritual
+genre: "{{GENRE}}"
+subgenre: "{{SUBGENRE}}"      # e.g. farewell-discourse, miracle, parable
+
+sermon_mode: preaching         # preaching | teaching | small_group
+target_audience: adult_congregation
+theme_hint: "{{THEME_HINT}}"  # 간단한 설교 방향 힌트
+
+# 생성 정보
+created: "{{DATE}}"
+workflow_version: "logos-max-v2"
+
+# 빠른 시작 명령어 (생성 후 사용)
+# python scripts/build_logos_recipe.py --passage {{PASSAGE_YAML_PATH}}
+# python scripts/audit_logos_coverage.py --passage {{PASSAGE_YAML_PATH}}
+# python scripts/gate_deep_research.py --passage {{PASSAGE_YAML_PATH}}

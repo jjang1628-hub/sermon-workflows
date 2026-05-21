@@ -1,0 +1,77 @@
+# Logos Resource Priorities — Logos-Max Sermon Workflow v2
+# 각 Logos 자료의 우선순위와 신뢰도를 정의한다.
+
+version: "2.0"
+
+# 주석 우선순위 (tier별)
+commentary_tiers:
+  tier_1:
+    label: "1순위 주석 (학술·복음주의 최고 수준)"
+    resources:
+      - "NICNT (New International Commentary on the New Testament)"
+      - "BECNT (Baker Exegetical Commentary on the NT)"
+      - "Pillar New Testament Commentary"
+      - "NICOT (New International Commentary on the OT)"
+      - "TOTC (Tyndale OT Commentaries)"
+      - "TNTC (Tyndale NT Commentaries)"
+      - "WBC (Word Biblical Commentary)"
+      - "NAC (New American Commentary)"
+      - "Craig Keener Commentaries"
+      - "D.A. Carson Commentaries"
+      - "Gordon Fee Commentaries"
+      - "Douglas Moo Commentaries"
+      - "박대영 박사 주석"
+
+  tier_2:
+    label: "2순위 주석 (신뢰할 수 있는 보조 자료)"
+    resources:
+      - "IVP Bible Background Commentary"
+      - "Expositor's Bible Commentary"
+      - "Bible Speaks Today"
+      - "New Bible Commentary"
+      - "BKC (Bible Knowledge Commentary)"
+
+  tier_3:
+    label: "3순위 (설교 보조 자료, 해석보다 적용 중심)"
+    resources:
+      - "Sermon Starter Guide"
+      - "Wiersbe BE Series"
+      - "Warren Wiersbe Commentaries"
+
+# 원어 사전 우선순위
+lexicons:
+  greek:
+    primary:
+      - "BDAG (Bauer-Danker-Arndt-Gingrich)"
+      - "LSJM (Liddell-Scott-Jones-McKenzie)"
+    secondary:
+      - "Thayer's Greek Lexicon"
+      - "Vine's Expository Dictionary"
+  hebrew:
+    primary:
+      - "HALOT (Hebrew and Aramaic Lexicon of the OT)"
+      - "BDB (Brown-Driver-Briggs)"
+    secondary:
+      - "Enhanced Strong's Lexicon"
+
+# 성경신학·배경 우선순위
+background_resources:
+  primary:
+    - "Keener Bible Background Commentary"
+    - "IVP Bible Background Commentary"
+    - "Zondervan Encyclopedia of the Bible"
+    - "Dictionary of Jesus and the Gospels"
+    - "Dictionary of Paul and His Letters"
+    - "Dictionary of the OT Pentateuch"
+    - "Dictionary of the OT Historical Books"
+  secondary:
+    - "Anchor Bible Dictionary"
+    - "Baker Encyclopedia of the Bible"
+    - "Holman Bible Dictionary"
+
+# 최소 요구 자료 (이것이 없으면 capture_incomplete)
+minimum_required:
+  commentaries_count: 2           # 최소 2권 주석
+  lexicon_entries_count: 1        # 핵심 단어 최소 1개 원어 사전 확인
+  translation_comparison_count: 2 # 최소 2개 번역본 비교
+  cross_references_count: 3       # 최소 3개 교차본문

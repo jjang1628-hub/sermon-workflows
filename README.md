@@ -1,7 +1,66 @@
 # sermon-workflows
 
-Logos Bible Study 캡처 자료를 기반으로 설교 연구를 자동화하는 워크플로우입니다.
-Ollama 로컬 LLM 1차 분석 → Quality Gate v2 판별 → Claude 심층 연구까지 8단계 파이프라인을 제공합니다.
+**Logos-first, AI-assisted, Pastor-finalized Sermon Research System**
+
+> 이 프로젝트는 설교문 자동 생성기가 아닙니다.  
+> **Logos 연구를 먼저 충분히 수행하도록 강제하는 설교 연구 자동화 시스템**입니다.  
+> 필수 Logos 자료가 누락되면 심층 분석으로 넘어가지 않습니다.  
+> 목표는 설교자를 대체하는 것이 아니라, 설교자가 본문 아래 더 오래 머물도록 돕는 것입니다.
+
+**핵심 원칙**:
+1. Scripture first — 본문이 먼저
+2. Logos research second — Logos 연구가 두 번째
+3. AI synthesis third — AI 통합이 세 번째
+4. Pastor finalization last — 목사님의 확정이 마지막
+
+---
+
+---
+
+## Logos-Max v2 워크플로우
+
+### 새 본문 시작 (권장 흐름)
+
+```powershell
+# 1. 새 본문 설정
+python scripts/run_logos_max.py `
+  --book John --passage 13:14 --context 13:1-17 `
+  --genre gospel --step setup
+
+# 2. 레시피 + 체크리스트 자동 생성
+python scripts/run_logos_max.py `
+  --passage docs/john/13-14/00-passage.yaml --step recipe
+
+# 3. (Logos에서 체크리스트 따라 캡처 → tmp/logos-capture/raw/ 에 저장)
+
+# 4. 캡처 완료 후 Coverage Audit
+python scripts/run_logos_max.py `
+  --passage docs/john/13-14/00-passage.yaml --step audit
+
+# 5. Coverage Gate 확인 (75점 미만이면 중단)
+python scripts/run_logos_max.py `
+  --passage docs/john/13-14/00-passage.yaml --step gate
+
+# 6. 통과 시 Deep Research 실행
+python scripts/run_logos_max.py `
+  --passage docs/john/13-14/00-passage.yaml --step deep
+```
+
+### 한 번에 실행 (all 모드)
+
+```powershell
+python scripts/run_logos_max.py `
+  --book John --passage 13:14 --context 13:1-17 --genre gospel
+```
+
+### Logos Coverage Score 기준
+
+| 점수 | 상태 | 판정 |
+|------|------|------|
+| 90+ | `deep_eligible` | ✅ 심층 연구 즉시 가능 |
+| 75–89 | `deep_eligible_with_warning` | ⚠️ 심층 연구 가능, 누락 경고 |
+| 60–74 | `review_required` | 🔴 보강 필요, 보류 권장 |
+| 0–59 | `insufficient` | 🛑 파이프라인 중단 |
 
 ---
 
@@ -118,15 +177,42 @@ git commit -m "merge: 충돌 해결"
 
 ```
 sermon-workflows/
-├── scripts/              # 파이프라인 스크립트 (Python)
-├── prompts/              # 프롬프트 템플릿
-├── configs/              # 설정 파일 (YAML)
-├── templates/            # 출력 템플릿
-├── docs/                 # 설계 문서 및 트러블슈팅
-├── input/                # 설교 개요 입력
-├── tmp/logos-capture/raw/  # Logos 캡처 원본 (연구 자산, git 포함)
+├── config/                         # Logos-Max 설정 (v2 신규)
+│   ├── logos_tool_categories.yaml  # 12개 Logos 자료군 정의
+│   ├── logos_capture_checklist.yaml
+│   ├── logos_resource_priorities.yaml
+│   ├── logos_coverage_rubric.yaml
+│   └── genre_recipes.yaml          # 장르별 레시피
+│
+├── templates/                      # 출력 템플릿
+│   ├── passage.yaml.template
+│   └── logos_coverage_report.md
+│
+├── scripts/                        # 파이프라인 스크립트
+│   ├── create_passage.py           # 0단계: passage.yaml 생성 (v2 신규)
+│   ├── build_logos_recipe.py       # 1–2단계: 레시피+체크리스트 (v2 신규)
+│   ├── audit_logos_coverage.py     # 4단계: Coverage Audit (v2 신규)
+│   ├── gate_deep_research.py       # 5단계: Coverage Gate (v2 신규)
+│   ├── run_logos_max.py            # v2 마스터 파이프라인 (v2 신규)
+│   ├── run_logos_max_research.py   # AI 7단계 파이프라인 (기존)
+│   └── run_all.py                  # 설교 산출물 생성 (기존)
+│
+├── docs/{book}/{passage}/          # 설교 연구 패키지
+│   ├── 00-passage.yaml             # 본문 설정
+│   ├── 01-logos-recipe.md          # Logos 도구 사용 순서
+│   ├── 02-logos-capture-checklist.md
+│   ├── 03-logos-coverage-report.md # Coverage Score 보고서
+│   ├── deep-research.md
+│   ├── final-direction.md
+│   ├── sermon-final.md             # 강단 최종 원고
+│   ├── sermon-delivery-compression.md
+│   ├── ppt-outline-preaching.md
+│   ├── small-group-guide-member.md
+│   └── rehearsal-guide.md
+│
+├── tmp/logos-capture/raw/          # Logos 캡처 원본 (git 포함)
 ├── requirements.txt
-├── SETUP.md              # 새 컴퓨터 셋업 가이드
+├── SETUP.md
 └── .gitignore
 ```
 

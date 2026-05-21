@@ -1,0 +1,139 @@
+# Logos Capture Checklist — Logos-Max Sermon Workflow v2
+# 각 캡처 항목의 지시문과 완료 기준을 정의한다.
+# build_capture_checklist.py에서 로드하여 passage.yaml + genre와 결합한다.
+
+version: "2.0"
+
+# 필수 캡처 항목 (모든 장르 공통)
+required_captures:
+
+  - id: C-01
+    category: text_establishment
+    title: "본문 범위 확정 (Passage Guide)"
+    logos_tool: "Passage Guide"
+    instruction: |
+      1. Passage Guide에서 본문 범위를 열어 전체 구조를 확인한다.
+      2. 본문 시작·끝 경계가 맞는지 확인한다.
+      3. 앞뒤 문맥(최소 3–5절)을 함께 확인한다.
+    capture_format: |
+      ## 본문 범위 확정
+      - 확정 범위:
+      - 문맥 앞:
+      - 문맥 뒤:
+      - 단락 구분 근거:
+    done_criteria: "본문 경계가 명확히 기록되어 있다"
+
+  - id: C-02
+    category: text_establishment
+    title: "번역 비교 (Text Comparison)"
+    logos_tool: "Text Comparison"
+    instruction: |
+      1. Text Comparison에서 개역개정 + NASB 또는 ESV 비교를 연다.
+      2. 번역이 다른 단어·표현을 표시한다.
+      3. 설교에서 중요한 단어의 번역 차이를 기록한다.
+    capture_format: |
+      ## 번역 비교
+      | 단어/구 | 개역개정 | NASB | ESV |
+      |---------|---------|------|-----|
+      |         |         |      |     |
+    done_criteria: "핵심 단어의 번역 차이 1개 이상 기록"
+
+  - id: C-03
+    category: original_language
+    title: "원어 핵심 단어 분석 (Exegetical Guide / Bible Word Study)"
+    logos_tool: "Exegetical Guide 또는 Bible Word Study"
+    instruction: |
+      1. 설교에 중요한 핵심 단어 1–3개를 선택한다.
+      2. Bible Word Study에서 각 단어를 검색한다.
+      3. BDAG 또는 HALOT 정의를 요약한다.
+      4. 해당 단어의 본문 내 용법을 기록한다.
+    capture_format: |
+      ## 핵심 원어 단어
+      ### [단어 1: 헬라어/히브리어]
+      - 발음:
+      - 사전 정의 (BDAG/HALOT):
+      - 본문 내 용법:
+      - 설교 의미:
+    done_criteria: "핵심 단어 1개 이상, BDAG/HALOT 정의 포함"
+
+  - id: C-04
+    category: cross_references
+    title: "교차본문 확인 (Cross References)"
+    logos_tool: "Treasury of Scripture Knowledge 또는 Cross References"
+    instruction: |
+      1. 본문의 주요 절에서 Cross References를 연다.
+      2. 관련 교차본문을 확인한다.
+      3. 설교에 실질적으로 연결되는 교차본문 3–7개를 선택한다.
+      4. 단순 나열이 아닌 연결 이유를 기록한다.
+    capture_format: |
+      ## 핵심 교차본문
+      | 본문 | 연결 이유 |
+      |------|---------|
+      |      |         |
+    done_criteria: "교차본문 3개 이상, 연결 이유 포함"
+
+  - id: C-05
+    category: commentaries
+    title: "주석 비교 (Passage Guide Commentaries)"
+    logos_tool: "Passage Guide > Commentaries"
+    instruction: |
+      1. Passage Guide의 Commentaries 섹션을 연다.
+      2. 1순위 주석 2권 이상(Keener, Carson, NICNT/BECNT 등)의 해당 본문을 확인한다.
+      3. 각 주석의 핵심 해석 요점을 요약한다.
+      4. 견해 차이가 있으면 명시한다.
+    capture_format: |
+      ## 주석 비교
+      ### [주석 1 이름]
+      - 핵심 해석:
+      - 설교 활용:
+
+      ### [주석 2 이름]
+      - 핵심 해석:
+      - 설교 활용:
+
+      ### 견해 차이 (있는 경우):
+    done_criteria: "주석 2권 이상, 각 주석의 핵심 해석 요점 포함"
+
+# 권장 캡처 항목 (장르에 따라 자동 선택)
+recommended_captures:
+
+  - id: C-06
+    category: structure_discourse
+    title: "구조·담화 분석 (Passage Analysis)"
+    logos_tool: "Passage Analysis 또는 Clause Search"
+    instruction: |
+      1. 본문의 주동사 흐름을 확인한다.
+      2. 접속사(but, therefore, because, so that)를 표시한다.
+      3. 반복어·핵심 어구를 찾는다.
+      4. 인물·화자·청자를 구분한다.
+    genres_applicable: [gospel, epistle, ot_narrative]
+
+  - id: C-07
+    category: background
+    title: "역사·문화 배경 (Factbook / Bible Dictionaries)"
+    logos_tool: "Factbook 또는 Bible Dictionaries"
+    instruction: |
+      1. 본문에 등장하는 핵심 개념(인물·장소·관습·사물)을 Factbook에서 검색한다.
+      2. 설교 이해에 직접 기여하는 배경 정보만 기록한다.
+      3. 배경 정보 과잉 기록 금지.
+    genres_applicable: [gospel, ot_narrative, prophetic, law_ritual]
+
+  - id: C-08
+    category: biblical_theology
+    title: "성경신학 테마 (Biblical Theology / Factbook Themes)"
+    logos_tool: "Biblical Theology 자료 또는 Factbook > Themes"
+    instruction: |
+      1. 본문의 핵심 신학 테마를 확인한다.
+      2. 구속사 흐름에서 이 본문의 위치를 확인한다.
+      3. 창조-타락-구속-새창조 중 어느 지점인가?
+    genres_applicable: [all]
+
+  - id: C-09
+    category: sermon_homiletics
+    title: "설교 자료 (Sermon Starter Guide)"
+    logos_tool: "Sermon Starter Guide"
+    instruction: |
+      1. Sermon Starter Guide에서 해당 본문을 검색한다.
+      2. 복음 프레임에 맞는 아이디어만 채택한다.
+      3. 도덕주의·인물영웅화 방향 아이디어는 거름.
+    genres_applicable: [all]

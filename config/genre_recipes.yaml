@@ -1,0 +1,152 @@
+# Genre Recipes — Logos-Max Sermon Workflow v2
+# 장르별 Logos 도구 우선순위와 특수 체크리스트를 정의한다.
+# create_passage.py / build_logos_recipe.py에서 로드한다.
+
+version: "2.0"
+
+genres:
+
+  gospel:
+    label: "복음서"
+    books: ["마태복음", "마가복음", "누가복음", "요한복음"]
+    subgenres:
+      - miracle
+      - parable
+      - discourse
+      - passion_narrative
+      - resurrection
+      - farewell_discourse
+    recipe:
+      priority_categories:
+        - text_establishment    # 병행 본문 비교 필수
+        - original_language     # 행위 동사·칭호 분석
+        - cross_references      # 병행 복음서 비교
+        - commentaries          # 최소 3권
+        - background            # 제2성전기 유대 배경
+        - structure_discourse   # 화자·청자·장면 전환
+      special_checks:
+        - "병행 복음서와 비교했는가? (마태·마가·누가·요한)"
+        - "예수님의 칭호(κύριος, διδάσκαλος 등)를 원어로 확인했는가?"
+        - "기적/비유/강화 장르가 확인되었는가?"
+        - "요한복음이면 σημεῖον(표적) 구조 또는 고별사 특성을 점검했는가?"
+      sermon_cautions:
+        - "인물 영웅화 금지 (제자, 바리새인 단순 예화 금지)"
+        - "기적 → 도덕 교훈 연결 금지 (기적의 구속사적 의미 먼저)"
+        - "그리스도 중심성: 인물 이야기가 아닌 그리스도의 행동에 초점"
+
+  epistle:
+    label: "서신서"
+    books:
+      - "로마서" - "고린도전서" - "고린도후서" - "갈라디아서" - "에베소서"
+      - "빌립보서" - "골로새서" - "데살로니가전서" - "데살로니가후서"
+      - "디모데전서" - "디모데후서" - "디도서" - "빌레몬서" - "히브리서"
+      - "야고보서" - "베드로전서" - "베드로후서" - "요한일서" - "유다서"
+    recipe:
+      priority_categories:
+        - text_establishment
+        - original_language     # 핵심 신학 용어 (δικαιοσύνη, χάρις 등)
+        - structure_discourse   # indicative / imperative 구분
+        - cross_references      # OT 인용 확인
+        - commentaries
+        - systematic_theology   # 서신은 교리와 직결됨
+        - biblical_theology
+      special_checks:
+        - "indicative(하나님이 하신 일) → imperative(우리의 응답) 구조를 확인했는가?"
+        - "핵심 신학 용어를 원어로 확인했는가?"
+        - "구약 인용 또는 암시가 있다면 출처를 확인했는가?"
+        - "저자·수신자·상황을 확인했는가?"
+      sermon_cautions:
+        - "imperative만 설교하는 도덕주의 금지"
+        - "indicative 없는 윤리 설교 금지"
+        - "교리 나열 → 삶 적용 기계적 연결 금지"
+
+  psalm_wisdom:
+    label: "시편·지혜서"
+    books: ["시편", "잠언", "전도서", "아가", "욥기"]
+    recipe:
+      priority_categories:
+        - text_establishment
+        - original_language     # 히브리 시 특성 (병행법, 키아즘)
+        - structure_discourse   # 시편 형식 분류 (탄식·찬양·감사)
+        - cross_references
+        - commentaries
+        - background            # 시편: 성전 예배 맥락
+        - biblical_theology
+      special_checks:
+        - "시편 장르(탄식시·찬양시·감사시·왕시·메시아시)를 확인했는가?"
+        - "히브리 병행법(동의·반의·종합)을 확인했는가?"
+        - "잠언: 격언의 문화적 배경을 확인했는가?"
+        - "욥기: 신정론 주제를 다루는가?"
+      sermon_cautions:
+        - "시편을 단순 감정 표현 예화로 사용 금지"
+        - "기독론적 해석 (메시아 시편): 억지 연결 금지"
+        - "잠언: 번영 신학 연결 금지"
+
+  ot_narrative:
+    label: "구약 역사서"
+    books:
+      - "창세기" - "출애굽기" - "여호수아" - "사사기" - "룻기"
+      - "사무엘상" - "사무엘하" - "열왕기상" - "열왕기하"
+      - "역대상" - "역대하" - "에스라" - "느헤미야" - "에스더"
+    recipe:
+      priority_categories:
+        - text_establishment
+        - structure_discourse   # 장면·인물·플롯 분석
+        - cross_references      # 신약 성취 확인
+        - commentaries
+        - background            # ANE 문화 맥락
+        - biblical_theology     # 구속사 위치 확인
+        - original_language
+      special_checks:
+        - "구속사에서 이 사건의 위치를 확인했는가?"
+        - "신약과의 연결이 본문 자체의 논리에서 나오는가?"
+        - "인물 이야기: 인물이 주인공이 아닌 하나님의 행동에 초점인가?"
+        - "ANE 문화 배경이 본문 이해에 실질적으로 기여하는가?"
+      sermon_cautions:
+        - "인물 영웅화 금지 (아브라함·모세·다윗 도덕 모범 설교 금지)"
+        - "신약과의 알레고리적 연결 과도 사용 금지"
+        - "역사적 사건 → 현대 적용 직결 금지 (구속사 경유 필수)"
+
+  prophetic:
+    label: "예언서"
+    books:
+      - "이사야" - "예레미야" - "예레미야애가" - "에스겔" - "다니엘"
+      - "호세아" - "요엘" - "아모스" - "오바댜" - "요나" - "미가"
+      - "나훔" - "하박국" - "스바냐" - "학개" - "스가랴" - "말라기"
+    recipe:
+      priority_categories:
+        - text_establishment
+        - original_language
+        - background            # 역사적 배경 (왕, 연대, 국제 정세)
+        - cross_references      # 신약 성취 구절
+        - commentaries
+        - structure_discourse
+        - biblical_theology
+      special_checks:
+        - "역사적 배경 (왕·시대·정치 상황)을 확인했는가?"
+        - "신약 인용 또는 성취를 확인했는가?"
+        - "묵시 문학이면 상징 해석 원칙을 따랐는가?"
+        - "경고와 소망의 구조를 확인했는가?"
+      sermon_cautions:
+        - "예언 = 현대 사건 예측으로 연결 금지"
+        - "묵시 상징의 과도한 현대화 금지"
+
+  law_ritual:
+    label: "율법·의식법"
+    books: ["레위기", "민수기", "신명기"]
+    recipe:
+      priority_categories:
+        - text_establishment
+        - background            # 제사 의식, 정결법 배경
+        - original_language
+        - cross_references      # 히브리서 성취 확인
+        - commentaries
+        - biblical_theology     # 그림자 → 실체 구조
+        - structure_discourse
+      special_checks:
+        - "율법의 그리스도 안에서의 성취를 히브리서 또는 바울 서신에서 확인했는가?"
+        - "의식법·도덕법·시민법 구분을 점검했는가?"
+        - "제사·정결 개념이 그리스도와 어떻게 연결되는가?"
+      sermon_cautions:
+        - "율법 직접 적용 금지 (그리스도 안에서의 성취 경유 필수)"
+        - "의식법을 현대 생활 적용으로 직결 금지"

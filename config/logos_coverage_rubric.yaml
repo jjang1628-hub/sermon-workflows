@@ -1,0 +1,113 @@
+# Logos Coverage Rubric — Logos-Max Sermon Workflow v2
+# 각 항목의 배점과 통과 기준을 정의한다.
+
+version: "2.0"
+
+items:
+  - id: R-01
+    category: text_establishment
+    label: "본문 범위·문맥 확인"
+    points: 10
+    check: "has_text_comparison"
+    description: "본문 경계 확인 + 번역 1개 이상 비교"
+
+  - id: R-02
+    category: text_establishment
+    label: "번역 비교"
+    points: 10
+    check: "has_translation_comparison"
+    description: "2개 이상 번역본 실질적 비교 확인"
+
+  - id: R-03
+    category: original_language
+    label: "원어·문법"
+    points: 15
+    check: "has_original_language"
+    description: "핵심 헬라어/히브리어 단어 1개 이상 + BDAG 또는 사전 정의"
+
+  - id: R-04
+    category: structure_discourse
+    label: "구조·담화"
+    points: 10
+    check: "has_structure_analysis"
+    description: "본문 구조 분석 또는 담화 흐름 확인"
+
+  - id: R-05
+    category: cross_references
+    label: "교차본문"
+    points: 10
+    check: "has_cross_references"
+    description: "교차본문 3개 이상 목록"
+
+  - id: R-06
+    category: commentaries
+    label: "주석 비교"
+    points: 15
+    check: "has_commentaries"
+    description: "주석 2권 이상 견해 포함"
+
+  - id: R-07
+    category: biblical_theology
+    label: "성경신학"
+    points: 10
+    check: "has_biblical_theology"
+    description: "신학 테마(구속, 언약 등) + 본문 연결"
+
+  - id: R-08
+    category: systematic_theology
+    label: "조직신학"
+    points: 5
+    check: "has_systematic_theology"
+    description: "교리 항목 1개 이상 + 본문 연결"
+
+  - id: R-09
+    category: background
+    label: "역사·문화 배경"
+    points: 5
+    check: "has_background"
+    description: "역사·문화 배경 1개 이상"
+
+  - id: R-10
+    category: sermon_homiletics
+    label: "설교 자료"
+    points: 5
+    check: "has_sermon_resources"
+    description: "설교 구조 또는 전달 아이디어 포함"
+
+  - id: R-11
+    category: application_pastoral
+    label: "목회·적용 자료"
+    points: 5
+    check: "has_application"
+    description: "복음 프레임 기반 적용 아이디어"
+
+total_points: 100
+
+thresholds:
+  deep_eligible_full:
+    score: 90
+    status: "deep_eligible"
+    label: "Logos-Max 심층 연구 즉시 가능"
+    action: "run_deep_research"
+    warning: null
+
+  deep_eligible_with_warning:
+    score: 75
+    status: "deep_eligible_with_warning"
+    label: "심층 연구 가능 (누락 경고 포함)"
+    action: "run_deep_research_with_gaps"
+    warning: "누락된 자료를 보강하면 연구 품질이 높아집니다."
+
+  review_required:
+    score: 60
+    status: "review_required"
+    label: "보강 필요 — deep_research 보류 권장"
+    action: "request_more_captures"
+    warning: "Logos 캡처 자료가 부족합니다. 보강 후 진행을 권장합니다."
+
+  insufficient:
+    score: 0
+    status: "insufficient"
+    label: "연구팩 불충분 — 설교 방향 생성 중단"
+    action: "stop_pipeline"
+    warning: "필수 Logos 자료가 누락되었습니다. 캡처 후 재실행하십시오."
