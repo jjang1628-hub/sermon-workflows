@@ -20,25 +20,29 @@ def clean_line(line: str) -> str:
 
 
 def extract_title(lines: list[str], fallback: str) -> str:
+    # 1순위: "- 제목:" 불릿 형식
+    for line in lines:
+        stripped = clean_line(line).lstrip("-*+# ").strip()
+        if stripped.startswith("제목:") or stripped.startswith("제목 :"):
+            return stripped.split(":", 1)[1].strip()
+    # 2순위: 첫 번째 h1 이후 h2
+    seen_h1 = False
     for line in lines:
         stripped = clean_line(line)
-        if stripped.startswith("#"):
+        if stripped.startswith("# ") and not seen_h1:
+            seen_h1 = True
+            continue
+        if stripped.startswith("## "):
             return stripped.lstrip("#").strip()
-
-    for line in lines:
-        stripped = clean_line(line)
-        if stripped:
-            return stripped
-
     return fallback
 
 
 def extract_scripture(lines: list[str]) -> str:
+    # 불릿·heading 접두사 모두 제거 후 본문 레이블 매칭
     for raw_line in lines:
-        line = clean_line(raw_line).lstrip("#").strip()
+        line = clean_line(raw_line).lstrip("-*+# ").strip()
         if not line:
             continue
-
         for label in SCRIPTURE_LABELS:
             if line.startswith(f"{label}:") or line.startswith(f"{label} :"):
                 return line.split(":", 1)[1].strip()

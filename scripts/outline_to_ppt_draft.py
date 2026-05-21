@@ -16,22 +16,39 @@ def clean_line(line: str) -> str:
 
 
 def find_title(lines: list[str], fallback: str) -> str:
+    # 1순위: "- 제목:" 불릿 형식 (예: "- 제목: 주님처럼 씻기라")
+    for line in lines:
+        stripped = clean_line(line).lstrip("-*+# ").strip()
+        if stripped.startswith("제목:") or stripped.startswith("제목 :"):
+            return stripped.split(":", 1)[1].strip()
+    # 2순위: 첫 번째 h1 이후 h2 제목 (섹션명 건너뜀)
+    seen_h1 = False
     for line in lines:
         stripped = clean_line(line)
-        if stripped.startswith("#"):
+        if stripped.startswith("# ") and not seen_h1:
+            seen_h1 = True
+            continue
+        if stripped.startswith("## "):
             return stripped.lstrip("#").strip()
     return fallback
 
 
 def find_scripture(lines: list[str]) -> str:
+    # 불릿(-  * +) 및 heading(#) 접두사를 모두 제거 후 "본문:" 패턴 매칭
     for line in lines:
-        stripped = clean_line(line).lstrip("#").strip()
+        stripped = clean_line(line).lstrip("-*+# ").strip()
         if stripped.startswith("본문:") or stripped.startswith("본문 :"):
             return stripped.split(":", 1)[1].strip()
     return "본문 보완 필요"
 
 
 def find_main_idea(lines: list[str]) -> str:
+    # 1순위: "- 메인 아이디어:" 불릿 형식
+    for line in lines:
+        stripped = clean_line(line).lstrip("-*+# ").strip()
+        if stripped.startswith("메인 아이디어:") or stripped.startswith("메인아이디어:"):
+            return stripped.split(":", 1)[1].strip()
+    # 2순위: "## 메인 아이디어" 섹션 아래 첫 문장
     in_section = False
     for line in lines:
         stripped = clean_line(line)
@@ -42,7 +59,7 @@ def find_main_idea(lines: list[str]) -> str:
             break
         if in_section and stripped:
             return stripped.strip("*")
-    return "신앙은 다시 나는 데서 시작됩니다."
+    return ""
 
 
 def find_sub_ideas(lines: list[str]) -> list[str]:
@@ -67,11 +84,7 @@ def render_markdown(
     sub_ideas: list[str],
     research_path: Path | None = None,
 ) -> str:
-    movements = sub_ideas or [
-        "종교적 익숙함은 새 생명을 대신하지 못합니다.",
-        "새 생명은 성령이 일으키시는 하나님의 역사입니다.",
-        "들리신 인자를 믿을 때 영생이 시작됩니다.",
-    ]
+    movements = sub_ideas or ["(서브 아이디어를 개요에 추가해 주세요.)"]
 
     lines = [
         "# PPT 초안",
@@ -100,10 +113,10 @@ def render_markdown(
     lines.extend(
         [
             f"## 슬라이드 {next_slide}",
-            "- 적용: 종교적 익숙함이 아니라 성령의 새 하심을 구합시다.",
+            "- 적용: (적용 문장을 직접 작성해 주세요.)",
             "",
             f"## 슬라이드 {next_slide + 1}",
-            "- 결론: 다시 남은 들리신 인자 예수를 믿을 때 시작됩니다.",
+            "- 결론: (결론 문장을 직접 작성해 주세요.)",
             "",
             "## 작성 메모",
             "- 한 슬라이드에 한 문장 원칙으로 유지해 주세요.",
