@@ -1,0 +1,145 @@
+# agent_roles.yaml — 에이전트 역할 정의
+
+---
+version: "1.0"
+project: "logos-max"
+description: "Logos-Max 본문중심 연구 자동화 에이전트 역할 정의"
+
+agents:
+
+  logos:
+    name: "Logos (출처 도서관)"
+    role: "원전 자료 수집 전용"
+    allowed:
+      - 성경 원문 열람 (NA28, UBS5, BHS, LXX)
+      - 공식 UI를 통한 복사·내보내기·인쇄
+      - Passage Guide, Exegetical Guide, Bible Word Study 열람
+      - Factbook, Theology Guide, Cross-Reference 열람
+      - 주석 UI 열람 및 Copy
+    forbidden:
+      - 내부 DB 직접 접근
+      - 설치 폴더 리소스 직접 추출
+      - 유료 자료 대량 스크래핑
+      - 장문 원문 무단 인용
+    capture_method:
+      - logos4_uri_scheme       # logos4:bible;... 형식의 URI
+      - clipboard_copy_paste    # Ctrl+A, Ctrl+C
+      - screen_capture_read     # computer-use screenshot + read
+    output_format: "raw markdown in tmp/logos-capture/raw/"
+
+  ollama:
+    name: "Ollama 로컬 LLM (1차 분석가)"
+    role: "Logos 캡처 자료 기반 초안 분석"
+    script: "scripts/run_local_research_with_ollama.py"
+    system_prompt_file: "prompts/ollama_first_pass.md"
+    allowed:
+      - 관찰 후보 도출
+      - 해석 방향 제안
+      - 적용 아이디어 초안
+    forbidden:
+      - 최종 신학 판단
+      - 원어 확정
+      - 설교 결론 확정
+      - "이것이 정확한 해석입니다" 단언
+    output_label: "1차 분석 초안 — 목사님 검토 필요"
+    output_dir: "output/local_research/"
+    default_model: "qwen3:1.7b"
+    fallback_model: "qwen3:0.6b"
+    timeout_seconds: 300
+    required_label_in_output: true
+
+  claude:
+    name: "Claude (심층 분석가)"
+    role: "개혁주의 구속사적 관점의 깊은 신학 분석"
+    script: "scripts/run_deep_research_with_claude.py"
+    system_prompt_file: "prompts/theological_core.md"
+    deep_research_prompt_file: "prompts/claude_deep_research.md"
+    allowed:
+      - 본문 구조 분석
+      - 원어 심층 분석 (NA28/BHS 기반)
+      - 주석 종합 (최소 3종)
+      - Evidence Ledger 작성
+      - Claim Audit 수행
+      - Counter-Reading 생성
+      - 설교 Big Idea 제안
+      - 설교자 내면화 압축본 생성
+    forbidden:
+      - "이것이 유일한 해석" 단언
+      - 설교 최종 결론 확정
+      - 목사님 대신 신학 판단
+    output_dir: "output/deep_research/"
+    passes: 20   # Multi-Pass Deep Research 패스 수
+
+  preacher:
+    name: "목사님 (최종 권위)"
+    role: "모든 분석의 최종 검토자이자 설교자"
+    authority: "최종"
+    note: |
+      자료는 제안이고 설교는 목사님의 것이다.
+      Claude의 모든 분석은 검토 대상이지 결론이 아니다.
+
+---
+# 에이전트 흐름 정의
+
+workflow:
+  step_1:
+    name: "Logos 연구 레시피 추천"
+    agent: "claude"
+    script: "scripts/recommend_logos_research_recipe.py"
+    input: "passage + mode"
+    output: "research recipe (which Logos tools to use)"
+
+  step_2:
+    name: "Logos 캡처 검증 게이트"
+    agent: "system"
+    script: "scripts/validate_logos_capture.py"
+    decision:
+      proceed: "캡처 완전 → 다음 단계"
+      limited: "캡처 부분적 → 제한적 분석 진행"
+      need_more: "캡처 부족 → Logos 추가 캡처 요청"
+      stop: "캡처 없음 + error 정책 → 중단"
+
+  step_3:
+    name: "연구 팩 준비"
+    agent: "system"
+    script: "scripts/prepare_research_pack.py"
+    output_dir: "output/research_packs/"
+
+  step_4:
+    name: "Ollama 1차 분석 (옵션)"
+    agent: "ollama"
+    condition: "mode in [standard, deep, expert] and ollama_available"
+    output_dir: "output/local_research/"
+
+  step_5:
+    name: "Claude 심층 연구"
+    agent: "claude"
+    script: "scripts/run_deep_research_with_claude.py"
+    passes: 20
+    output_dir: "output/deep_research/"
+
+  step_6a:
+    name: "Evidence Ledger 생성"
+    agent: "claude"
+    script: "scripts/build_evidence_ledger.py"
+    output_dir: "output/evidence_ledgers/"
+
+  step_6b:
+    name: "Claim Audit 실행"
+    agent: "claude"
+    script: "scripts/audit_research_claims.py"
+    questions: 12
+    output_dir: "output/claim_audits/"
+
+  step_6c:
+    name: "Counter-Reading 생성"
+    agent: "claude"
+    script: "scripts/run_counter_reading.py"
+    perspectives: 8
+    output_dir: "output/deep_research/"
+
+  step_7:
+    name: "출력 계약 검증"
+    agent: "system"
+    script: "scripts/validate_output_contract.py"
+    config: "configs/output_contracts.yaml"

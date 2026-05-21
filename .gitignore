@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+env/
+
+# 환경 변수 / API 키 (절대 커밋 금지)
+.env
+.env.*
+*.env
+secrets.py
+api_keys.py
+
+# 출력 파일 (재생성 가능 — 용량 절약)
+output/
+build/
+
+# 임시 파일
+tmp/prompts/
+*.tmp
+*.log
+*.bak
+
+# Logos 캡처 원본은 포함 (연구 자산)
+# tmp/logos-capture/raw/ 는 포함
+!tmp/
+!tmp/logos-capture/
+!tmp/logos-capture/raw/
+!tmp/logos-capture/raw/**
+!tmp/logos-capture/validated/
+!tmp/logos-capture/validated/**
+# validated 하위 파일도 포함
+tmp/logos-capture/validated/*.tmp
+
+# 임시 처리 파일
+tmp/slides/
+tmp/*.tmp
+
+# Windows
+Thumbs.db
+Desktop.ini
+*.lnk
+
+# VS Code
+.vscode/settings.json
+.vscode/launch.json
+
+# Claude / AI 캐시
+.claude_cache/

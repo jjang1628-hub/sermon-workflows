@@ -1,0 +1,8 @@
+# sermon-workflows Python 의존성
+# 설치: pip install -r requirements.txt
+
+anthropic>=0.103.0   # Claude API (Step 5 심층 연구용)
+
+# 아래는 pip 설치 불필요 — 별도 설치
+# Ollama: https://ollama.com (로컬 LLM 서버, Step 4용)
+# Python 3.11+ 권장 (표준 라이브러리만 사용)

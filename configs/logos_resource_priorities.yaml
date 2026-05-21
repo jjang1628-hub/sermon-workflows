@@ -1,0 +1,167 @@
+# logos_resource_priorities.yaml — Logos 자료 우선순위
+
+---
+version: "1.0"
+description: "장르·모드별 자료 추천 우선순위 (소유 여부 무관한 이상적 목록)"
+
+# 자료 신뢰도 등급
+resource_tiers:
+  tier_1:
+    label: "1등급 — 원어 기반 주석"
+    description: "헬라어/히브리어 원문 기반의 학문적 주석"
+  tier_2:
+    label: "2등급 — 신학적 주석"
+    description: "신학적 깊이 있는 강해 주석"
+  tier_3:
+    label: "3등급 — 적용 주석"
+    description: "신학과 적용을 연결하는 주석"
+  tier_4:
+    label: "4등급 — 배경 자료"
+    description: "역사·문화·고고학 배경 자료"
+
+# NT 주석 우선순위 (장르별)
+nt_commentaries:
+
+  gospels_matthew:
+    passage_type: "마태복음"
+    tier_1:
+      - author: "D.A. Carson"
+        title: "The Gospel according to Matthew (EBC)"
+        series: "Expositor's Bible Commentary"
+      - author: "Craig L. Blomberg"
+        title: "Matthew (NAC)"
+        series: "New American Commentary"
+      - author: "R.T. France"
+        title: "The Gospel of Matthew (NICNT)"
+        series: "NICNT"
+    tier_2:
+      - author: "John Nolland"
+        title: "The Gospel of Matthew (NIGTC)"
+        series: "NIGTC"
+      - author: "N.T. Wright"
+        title: "Matthew for Everyone"
+    tier_3:
+      - author: "William Barclay"
+        title: "The Gospel of Matthew (DSB)"
+
+  gospels_john:
+    passage_type: "요한복음"
+    tier_1:
+      - author: "D.A. Carson"
+        title: "The Gospel according to John (Pillar)"
+        series: "Pillar New Testament Commentary"
+      - author: "Craig S. Keener"
+        title: "The Gospel of John (CLC)"
+        series: "CLC"
+      - author: "Leon Morris"
+        title: "The Gospel according to John (NICNT)"
+        series: "NICNT"
+    tier_2:
+      - author: "R. Alan Culpepper"
+        title: "John (NIB)"
+        series: "New Interpreter's Bible"
+      - author: "Andreas J. Köstenberger"
+        title: "John (BECNT)"
+        series: "BECNT"
+      - author: "박대영"
+        title: "예수님을 따라가는 요한복음"
+        language: "korean"
+    tier_3:
+      - author: "N.T. Wright"
+        title: "John for Everyone"
+
+  epistles_romans:
+    passage_type: "로마서"
+    tier_1:
+      - author: "Douglas Moo"
+        title: "The Letter to the Romans (NICNT)"
+        series: "NICNT"
+      - author: "Thomas Schreiner"
+        title: "Romans (BECNT)"
+        series: "BECNT"
+    tier_2:
+      - author: "James D.G. Dunn"
+        title: "Romans (WBC)"
+        series: "Word Biblical Commentary"
+      - author: "C.E.B. Cranfield"
+        title: "A Critical and Exegetical Commentary on the Epistle to the Romans (ICC)"
+    tier_3:
+      - author: "N.T. Wright"
+        title: "Romans (NIB)"
+
+  epistles_corinthians:
+    passage_type: "고린도전서"
+    tier_1:
+      - author: "Anthony Thiselton"
+        title: "The First Epistle to the Corinthians (NIGTC)"
+        series: "NIGTC"
+      - author: "Gordon Fee"
+        title: "The First Epistle to the Corinthians (NICNT)"
+        series: "NICNT"
+    tier_2:
+      - author: "David Garland"
+        title: "1 Corinthians (BECNT)"
+        series: "BECNT"
+
+# OT 주석 우선순위
+ot_commentaries:
+
+  psalms:
+    passage_type: "시편"
+    tier_1:
+      - author: "Peter Craigie"
+        title: "Psalms 1–50 (WBC)"
+        series: "Word Biblical Commentary"
+      - author: "Marvin Tate"
+        title: "Psalms 51–100 (WBC)"
+      - author: "Leslie Allen"
+        title: "Psalms 101–150 (WBC)"
+    tier_2:
+      - author: "VanGemeren"
+        title: "Psalms (EBC)"
+      - author: "Derek Kidner"
+        title: "Psalms (TOTC)"
+        series: "Tyndale OT Commentary"
+
+  genesis:
+    passage_type: "창세기"
+    tier_1:
+      - author: "Victor Hamilton"
+        title: "The Book of Genesis (NICOT)"
+        series: "NICOT"
+      - author: "Kenneth Mathews"
+        title: "Genesis (NAC)"
+    tier_2:
+      - author: "Gordon Wenham"
+        title: "Genesis (WBC)"
+
+# 원어 자료 우선순위
+lexical_resources:
+  greek:
+    tier_1:
+      - "BDAG (Bauer-Danker-Arndt-Gingrich)"
+      - "Louw-Nida Greek-English Lexicon"
+    tier_2:
+      - "Thayer's Greek-English Lexicon"
+      - "Mounce's Complete Expository Dictionary"
+    reference:
+      - "TDNT (Theological Dictionary of the NT)"
+      - "NIDNTT"
+  hebrew:
+    tier_1:
+      - "HALOT (Hebrew and Aramaic Lexicon of the OT)"
+      - "BDB (Brown-Driver-Briggs)"
+    tier_2:
+      - "TWOT"
+    reference:
+      - "TDOT"
+      - "NIDOTTE"
+
+# 교차 텍스트 자료
+intertextuality_resources:
+  tier_1:
+    - "Commentary on the NT Use of the OT (Beale & Carson)"
+    - "NT Biblical Theology (Schreiner)"
+  tier_2:
+    - "According to Plan (Goldsworthy)"
+    - "Grasp the Word (VanGemeren)"

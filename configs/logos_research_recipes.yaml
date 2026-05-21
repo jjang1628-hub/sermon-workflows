@@ -1,0 +1,305 @@
+# logos_research_recipes.yaml — 장르별 Logos 연구 레시피
+
+---
+version: "1.0"
+description: "성경 장르별 Logos 도구 사용 순서와 캡처 대상 정의"
+
+recipes:
+
+  gospel:
+    label: "복음서 (Gospel)"
+    books: ["마태복음", "마가복음", "누가복음", "요한복음"]
+    characteristics:
+      - 서사 + 교훈의 혼합
+      - 예수님의 언행 중심
+      - 구약 인용과 반향
+      - 유대 청중 vs. 이방 청중 고려
+    logos_steps:
+      step_1:
+        tool: "Passage Guide"
+        focus: "Context, Literary Context 섹션 먼저"
+        capture: "본문 개요, 문맥 섹션 전체"
+        time_quick: 5
+        time_standard: 10
+      step_2:
+        tool: "Exegetical Guide"
+        focus: "헬라어 핵심 동사/명사 (주동사, 분사, 특수 형태)"
+        capture: "주요 원어 분석 섹션"
+        time_quick: 5
+        time_standard: 15
+      step_3:
+        tool: "Bible Word Study"
+        focus: "1–2개 핵심 단어 심층 분석"
+        capture: "단어 의미, 신약 용례, 배경 의미"
+        time_quick: 0
+        time_standard: 10
+      step_4:
+        tool: "Cross-Reference"
+        focus: "구약 반향과 인용 확인"
+        capture: "관련 구약 본문 목록"
+        time_quick: 5
+        time_standard: 10
+      step_5:
+        tool: "Factbook"
+        focus: "인물, 지명, 유대 배경 개념"
+        capture: "핵심 배경 정보 2–3항목"
+        time_quick: 0
+        time_standard: 10
+    key_questions:
+      - "이 사건/말씀이 예수님의 메시아 정체성과 어떻게 연결되는가?"
+      - "구약의 어떤 주제나 예언이 성취되는가?"
+      - "제자들 또는 청중의 반응은 무엇을 드러내는가?"
+
+  epistle:
+    label: "서신서 (Epistle)"
+    books: ["로마서", "고린도전서", "고린도후서", "갈라디아서", "에베소서",
+            "빌립보서", "골로새서", "데살로니가전서", "데살로니가후서",
+            "디모데전서", "디모데후서", "디도서", "빌레몬서", "히브리서",
+            "야고보서", "베드로전서", "베드로후서", "요한일서", "요한이서",
+            "요한삼서", "유다서"]
+    characteristics:
+      - 논증 구조 중심
+      - 신학 용어 집중
+      - 특정 교회/상황 대응
+      - 명령 + 근거 (indicative → imperative)
+    logos_steps:
+      step_1:
+        tool: "Exegetical Guide"
+        focus: "구문 구조 분석 먼저 — 주동사와 종속절 관계"
+        capture: "구문 분석, 주요 명사/동사 원어"
+        time_quick: 5
+        time_standard: 15
+      step_2:
+        tool: "Bible Word Study"
+        focus: "신학 용어 집중 분석 (은혜, 칭의, 화해 등)"
+        capture: "신학 용어 의미, TDNT/NIDNTT 참조"
+        time_quick: 5
+        time_standard: 15
+      step_3:
+        tool: "Passage Guide"
+        focus: "서신 논증 구조 파악"
+        capture: "주석 목록, 개요 섹션"
+        time_quick: 5
+        time_standard: 10
+      step_4:
+        tool: "Theology Guide"
+        focus: "교의학 연결 주제"
+        capture: "관련 신학 주제 목록"
+        time_quick: 0
+        time_standard: 10
+      step_5:
+        tool: "Cross-Reference"
+        focus: "동일 서신 내 반향과 구약 배경"
+        capture: "관련 본문 목록"
+        time_quick: 0
+        time_standard: 5
+    key_questions:
+      - "바울(또는 저자)의 논증의 핵심 전제는 무엇인가?"
+      - "명령(imperative)의 근거(indicative)는 무엇인가?"
+      - "이 서신의 교회 상황이 이 구절에 어떻게 영향을 미치는가?"
+
+  ot_narrative:
+    label: "구약 내러티브 (OT Narrative)"
+    books: ["창세기", "출애굽기", "레위기", "민수기", "신명기",
+            "여호수아", "사사기", "룻기", "사무엘상", "사무엘하",
+            "열왕기상", "열왕기하", "역대상", "역대하", "에스라",
+            "느헤미야", "에스더"]
+    characteristics:
+      - 서사 플롯 중심
+      - 인물의 실패와 하나님의 개입
+      - 언약 성취와 실패
+      - 신약 성취를 향한 방향
+    logos_steps:
+      step_1:
+        tool: "Passage Guide"
+        focus: "서사 흐름과 문맥 — 전후 챕터 관계"
+        capture: "개요, 문맥 섹션"
+        time_quick: 5
+        time_standard: 10
+      step_2:
+        tool: "Factbook"
+        focus: "인물, 지명, 제도, 문화 배경"
+        capture: "핵심 배경 정보"
+        time_quick: 5
+        time_standard: 15
+      step_3:
+        tool: "Bible Word Study"
+        focus: "히브리어 핵심 서사 단어"
+        capture: "단어 의미, 구약 용례"
+        time_quick: 0
+        time_standard: 10
+      step_4:
+        tool: "Cross-Reference"
+        focus: "신약 인용·반향·성취 확인"
+        capture: "신약 연결 본문 목록"
+        time_quick: 5
+        time_standard: 10
+      step_5:
+        tool: "Exegetical Guide"
+        focus: "히브리어 문법 핵심 포인트"
+        capture: "히브리어 주요 분석"
+        time_quick: 0
+        time_standard: 10
+    key_questions:
+      - "이 인물의 실패 또는 성공이 인간의 어떤 보편적 문제를 드러내는가?"
+      - "하나님의 개입이 어떻게 묘사되는가?"
+      - "이 서사가 신약의 어떤 성취를 가리키는가?"
+
+  law_ritual:
+    label: "율법·의식 (Law/Ritual)"
+    books_sections: ["레위기 의식법", "출애굽기 율법", "신명기 법전"]
+    characteristics:
+      - 의식과 제도의 상징적 의미
+      - 언약 조건
+      - 신약 성취 (히브리서 등)
+      - 거룩과 죄의 신학
+    logos_steps:
+      step_1:
+        tool: "Factbook"
+        focus: "의식, 제도, 제사장직 배경"
+        capture: "배경 설명 전체"
+        time_quick: 5
+        time_standard: 15
+      step_2:
+        tool: "Exegetical Guide"
+        focus: "히브리어 법령·의식 용어"
+        capture: "핵심 법령 용어 분석"
+        time_quick: 5
+        time_standard: 15
+      step_3:
+        tool: "Theology Guide"
+        focus: "언약 신학 연결 — 율법의 기능"
+        capture: "관련 신학 주제"
+        time_quick: 0
+        time_standard: 10
+      step_4:
+        tool: "Cross-Reference"
+        focus: "신약 성취 (히브리서, 갈라디아서)"
+        capture: "신약 연결 본문"
+        time_quick: 5
+        time_standard: 10
+      step_5:
+        tool: "Bible Word Study"
+        focus: "핵심 법령 단어 의미 변화"
+        capture: "구약→신약 단어 용례 변화"
+        time_quick: 0
+        time_standard: 5
+    key_questions:
+      - "이 율법/의식이 무엇을 가리키고 있는가?"
+      - "그리스도 안에서 이 율법은 어떻게 성취되었는가?"
+      - "이 율법의 영구적 원리는 무엇이며 일시적 형식은 무엇인가?"
+
+  psalm_wisdom:
+    label: "시편·지혜 (Psalm/Wisdom)"
+    books: ["시편", "잠언", "전도서", "아가", "욥기"]
+    characteristics:
+      - 시적 구조 (평행법, 이미지)
+      - 감정과 신뢰의 언어
+      - 하나님 경험의 표현
+      - 그리스도 예언 (메시아 시편)
+    logos_steps:
+      step_1:
+        tool: "Exegetical Guide"
+        focus: "히브리어 시 구조 — 평행법, 키아즘"
+        capture: "시 구조 분석, 핵심 원어"
+        time_quick: 5
+        time_standard: 15
+      step_2:
+        tool: "Bible Word Study"
+        focus: "감정·신뢰·하나님 호칭 단어"
+        capture: "핵심 단어 의미"
+        time_quick: 5
+        time_standard: 10
+      step_3:
+        tool: "Passage Guide"
+        focus: "시편 장르 정보, 표제 해설"
+        capture: "장르 분류, 표제 해설"
+        time_quick: 5
+        time_standard: 10
+      step_4:
+        tool: "Cross-Reference"
+        focus: "신약 인용 확인 (특히 메시아 시편)"
+        capture: "신약 인용 목록"
+        time_quick: 5
+        time_standard: 10
+      step_5:
+        tool: "Factbook"
+        focus: "역사적 배경 (표제가 있는 시편)"
+        capture: "역사 배경"
+        time_quick: 0
+        time_standard: 5
+    key_questions:
+      - "이 시의 감정적 궤도는 무엇인가 (탄식→신뢰, 찬양→확신 등)?"
+      - "신약이 이 시를 어떻게 인용하는가?"
+      - "오늘 성도의 어떤 감정 상황에서 이 시가 울림을 갖는가?"
+
+  prophetic_apocalyptic:
+    label: "예언·묵시 (Prophetic/Apocalyptic)"
+    books: ["이사야", "예레미야", "예레미야애가", "에스겔", "다니엘",
+            "호세아", "요엘", "아모스", "오바댜", "요나", "미가",
+            "나훔", "하박국", "스바냐", "학개", "스가랴", "말라기",
+            "요한계시록"]
+    characteristics:
+      - 역사적 맥락과 예언의 이중 지평
+      - 상징과 이미지 언어
+      - 심판과 회복의 변증법
+      - 종말론적 소망
+    logos_steps:
+      step_1:
+        tool: "Cross-Reference"
+        focus: "반향 텍스트 전체 — 구약 내부 + 신약 인용"
+        capture: "관련 본문 전체 목록"
+        time_quick: 5
+        time_standard: 15
+      step_2:
+        tool: "Factbook"
+        focus: "역사적 배경 — 예언 당시 상황"
+        capture: "역사 배경 설명"
+        time_quick: 5
+        time_standard: 10
+      step_3:
+        tool: "Exegetical Guide"
+        focus: "상징·이미지 언어의 히브리어 분석"
+        capture: "핵심 상징 원어 분석"
+        time_quick: 5
+        time_standard: 10
+      step_4:
+        tool: "Theology Guide"
+        focus: "종말론, 메시아, 언약 회복 주제"
+        capture: "관련 신학 주제"
+        time_quick: 0
+        time_standard: 10
+      step_5:
+        tool: "Bible Word Study"
+        focus: "핵심 예언 단어 (샬롬, 메시아, 심판 등)"
+        capture: "예언 단어 용례"
+        time_quick: 0
+        time_standard: 5
+    key_questions:
+      - "이 예언의 역사적 성취와 종말론적 성취는 어떻게 구분되는가?"
+      - "이 상징/이미지가 청중에게 어떤 신학적 메시지를 전달하는가?"
+      - "이 예언이 그리스도의 사역과 어떻게 연결되는가?"
+
+---
+# 장르 자동 감지 키워드
+
+genre_detection:
+  gospel:
+    keywords: ["마태복음", "마가복음", "누가복음", "요한복음"]
+    patterns: ["마 ", "막 ", "눅 ", "요 "]
+  epistle:
+    keywords: ["로마서", "고린도", "갈라디아서", "에베소서", "빌립보서",
+               "골로새서", "데살로니가", "디모데", "디도서", "빌레몬서",
+               "히브리서", "야고보서", "베드로", "요한일서", "요한이서",
+               "요한삼서", "유다서"]
+  psalm_wisdom:
+    keywords: ["시편", "잠언", "전도서", "아가", "욥기"]
+  prophetic_apocalyptic:
+    keywords: ["이사야", "예레미야", "에스겔", "다니엘", "호세아",
+               "요엘", "아모스", "미가", "스가랴", "요한계시록"]
+  ot_narrative:
+    keywords: ["창세기", "출애굽기", "여호수아", "사사기", "룻기",
+               "사무엘", "열왕기", "역대", "에스라", "느헤미야", "에스더"]
+  law_ritual:
+    keywords: ["레위기", "민수기", "신명기"]
+    context_keywords: ["번제", "속죄제", "규례", "율법"]

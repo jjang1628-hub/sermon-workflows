@@ -1,0 +1,113 @@
+# logos_library_categories.yaml — Logos 자료 분류 체계
+
+---
+version: "1.0"
+description: "Logos 소유 자료를 분류하는 기준 체계"
+
+categories:
+
+  bibles:
+    label: "성경 원문 및 번역"
+    subcategories:
+      - greek_nt      # 헬라어 신약 (NA28, UBS5, SBL GNT)
+      - hebrew_ot     # 히브리어 구약 (BHS, BHQ)
+      - lxx           # 칠십인역
+      - korean_trans  # 한국어 번역 (개역개정, 새번역, 공동번역)
+      - english_trans # 영어 번역 (ESV, NASB, NIV, NRSV, KJV)
+      - interlinear   # 대역 성경
+    priority: 1
+    logos_tool: "Bible Text Comparison"
+
+  original_language:
+    label: "원어 분석 도구"
+    subcategories:
+      - greek_lexicon       # 헬라어 사전 (BDAG, Louw-Nida, Thayer)
+      - hebrew_lexicon      # 히브리어 사전 (BDB, HALOT, DCH)
+      - grammar             # 문법서 (Wallace, Joüon-Muraoka)
+      - word_study          # 단어 연구 (TDNT, TDOT, NIDNTT)
+      - concordance         # 용어 색인
+    priority: 2
+    logos_tool: "Bible Word Study, Exegetical Guide"
+
+  commentaries:
+    label: "주석"
+    subcategories:
+      - exegetical          # 주해 주석 (NICNT, BECNT, WBC, NIGTC)
+      - expository          # 강해 주석 (Pillar, BST)
+      - devotional          # 묵상 주석 (Barclay)
+      - korean              # 한국어 주석 (박대영 등)
+      - classical           # 고전 주석 (Calvin, Chrysostom)
+    priority: 3
+    logos_tool: "Passage Guide (주석 섹션)"
+
+  biblical_theology:
+    label: "성경신학"
+    subcategories:
+      - redemptive_history  # 구속사 (Vos, Graeme Goldsworthy)
+      - theme_studies       # 주제 연구
+      - nt_theology         # 신약신학 (Ladd, Thielman)
+      - ot_theology         # 구약신학 (Dempster, VanGemeren)
+      - intertextuality     # 교차 텍스트 (Beale & Carson CNTOT)
+    priority: 4
+    logos_tool: "Theology Guide, Cross-Reference"
+
+  systematic_theology:
+    label: "조직신학"
+    subcategories:
+      - reformed            # 개혁주의 (Bavinck, Berkhof, Calvin)
+      - confessions         # 신앙고백 (WCF, HC, CD)
+      - surveys             # 개론 (Grudem, Erickson)
+    priority: 5
+    logos_tool: "Theology Guide"
+
+  background:
+    label: "역사·문화 배경"
+    subcategories:
+      - archaeology         # 고고학
+      - jewish_context      # 유대 배경 (Keener Background Commentary)
+      - greco_roman         # 그레코-로마 배경
+      - geography           # 지리 (Atlas)
+      - dictionaries        # 사전 (ABD, DJG, DNTB)
+    priority: 6
+    logos_tool: "Factbook, Cultural Concepts"
+
+  sermon_ministry:
+    label: "설교·목회 자료"
+    subcategories:
+      - preaching_theory    # 설교학 이론
+      - sermon_collections  # 설교 모음
+      - illustrations       # 예화
+      - korean_preaching    # 한국 설교자 자료
+    priority: 7
+    logos_tool: "Passage Guide (설교 섹션)"
+
+---
+# 분류 우선순위 (연구 흐름)
+
+research_flow_priorities:
+  quick_mode:
+    - bibles
+    - commentaries
+    - original_language
+  standard_mode:
+    - bibles
+    - original_language
+    - commentaries
+    - biblical_theology
+    - background
+  deep_mode:
+    - bibles
+    - original_language
+    - commentaries
+    - biblical_theology
+    - systematic_theology
+    - background
+    - sermon_ministry
+  expert_mode:
+    - bibles
+    - original_language
+    - commentaries
+    - biblical_theology
+    - systematic_theology
+    - background
+    - sermon_ministry

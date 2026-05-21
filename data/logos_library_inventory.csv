@@ -1,0 +1,20 @@
+resource_id,title,author,publisher,year,language,category,subcategory,logos_resource_id,notes
+BIB-001,개역개정 성경,,대한성서공회,2006,korean,bibles,korean_trans,,
+BIB-002,새번역 성경,,대한성서공회,2001,korean,bibles,korean_trans,,
+BIB-003,English Standard Version (ESV),,Crossway,2001,english,bibles,english_trans,,
+BIB-004,Nestle-Aland Greek New Testament 28 (NA28),Nestle-Aland,Deutsche Bibelgesellschaft,2012,greek,bibles,greek_nt,,
+BIB-005,Biblia Hebraica Stuttgartensia (BHS),,Deutsche Bibelgesellschaft,1977,hebrew,bibles,hebrew_ot,,
+COM-001,The Gospel according to John (Pillar),D.A. Carson,Eerdmans,1991,english,commentaries,exegetical,pillar_john,요한복음 핵심 주석
+COM-002,The Gospel of John (CLC),Craig S. Keener,Hendrickson,2003,english,commentaries,exegetical,,2권 세트
+COM-003,예수님을 따라가는 요한복음,박대영,성서유니온,2015,korean,commentaries,korean,,
+COM-004,The Letter to the Romans (NICNT),Douglas Moo,Eerdmans,1996,english,commentaries,exegetical,,
+COM-005,Romans (BECNT),Thomas Schreiner,Baker,1998,english,commentaries,exegetical,,
+COM-006,The First Epistle to the Corinthians (NICNT),Gordon Fee,Eerdmans,1987,english,commentaries,exegetical,,
+LEX-001,BDAG Greek-English Lexicon,Bauer-Danker,University of Chicago Press,2000,english,original_language,greek_lexicon,,표준 헬라어 사전
+LEX-002,Louw-Nida Greek-English Lexicon,Louw & Nida,UBS,1988,english,original_language,greek_lexicon,,의미 도메인 분류
+LEX-003,BDB Hebrew Lexicon,Brown-Driver-Briggs,,1907,english,original_language,hebrew_lexicon,,
+BT-001,Commentary on the NT Use of the OT,Beale & Carson,Baker,2007,english,biblical_theology,intertextuality,,구약-신약 연결 필수 자료
+BT-002,According to Plan,Graeme Goldsworthy,IVP,1991,english,biblical_theology,redemptive_history,,
+ST-001,Reformed Dogmatics (바빙크 개혁교의학),Herman Bavinck,Baker,2003,english,systematic_theology,reformed,,4권
+BG-001,The IVP Bible Background Commentary NT,Keener,IVP,1993,english,background,jewish_context,,
+BG-002,Zondervan Illustrated Bible Backgrounds Commentary,Keener et al.,Zondervan,2009,english,background,jewish_context,,

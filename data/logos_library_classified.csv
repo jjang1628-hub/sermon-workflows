@@ -1,0 +1,20 @@
+﻿resource_id,title,author,publisher,year,language,category,subcategory,logos_resource_id,notes,tier,genre_gospel,genre_epistle,genre_ot_narrative,genre_psalm_wisdom,genre_prophetic,genre_law,priority_score
+BIB-001,개역개정 성경,,대한성서공회,2006,korean,bibles,korean_trans,,,1,yes,yes,yes,yes,yes,yes,95
+BIB-002,새번역 성경,,대한성서공회,2001,korean,bibles,korean_trans,,,1,yes,yes,yes,yes,yes,yes,95
+BIB-003,English Standard Version (ESV),,Crossway,2001,english,bibles,english_trans,,,1,yes,yes,yes,yes,yes,yes,95
+BIB-004,Nestle-Aland Greek New Testament 28 (NA28),Nestle-Aland,Deutsche Bibelgesellschaft,2012,greek,bibles,greek_nt,,,1,yes,yes,yes,yes,yes,yes,95
+BIB-005,Biblia Hebraica Stuttgartensia (BHS),,Deutsche Bibelgesellschaft,1977,hebrew,bibles,hebrew_ot,,,1,yes,yes,yes,yes,yes,yes,95
+COM-001,The Gospel according to John (Pillar),D.A. Carson,Eerdmans,1991,english,commentaries,exegetical,pillar_john,요한복음 핵심 주석,1,yes,no,no,no,no,no,95
+COM-002,The Gospel of John (CLC),Craig S. Keener,Hendrickson,2003,english,commentaries,exegetical,,2권 세트,1,yes,no,no,no,no,no,95
+COM-003,예수님을 따라가는 요한복음,박대영,성서유니온,2015,korean,commentaries,korean,,,2,yes,no,no,no,no,no,80
+COM-004,The Letter to the Romans (NICNT),Douglas Moo,Eerdmans,1996,english,commentaries,exegetical,,,1,no,yes,no,no,no,no,95
+COM-005,Romans (BECNT),Thomas Schreiner,Baker,1998,english,commentaries,exegetical,,,1,no,yes,no,no,no,no,95
+COM-006,The First Epistle to the Corinthians (NICNT),Gordon Fee,Eerdmans,1987,english,commentaries,exegetical,,,1,no,yes,no,no,no,no,95
+LEX-001,BDAG Greek-English Lexicon,Bauer-Danker,University of Chicago Press,2000,english,original_language,greek_lexicon,,표준 헬라어 사전,1,yes,yes,yes,yes,yes,yes,95
+LEX-002,Louw-Nida Greek-English Lexicon,Louw & Nida,UBS,1988,english,original_language,greek_lexicon,,의미 도메인 분류,1,yes,yes,yes,yes,yes,yes,95
+LEX-003,BDB Hebrew Lexicon,Brown-Driver-Briggs,,1907,english,original_language,hebrew_lexicon,,,1,yes,yes,yes,yes,yes,yes,95
+BT-001,Commentary on the NT Use of the OT,Beale & Carson,Baker,2007,english,biblical_theology,intertextuality,,구약-신약 연결 필수 자료,2,yes,yes,yes,yes,yes,yes,80
+BT-002,According to Plan,Graeme Goldsworthy,IVP,1991,english,biblical_theology,redemptive_history,,,2,yes,yes,yes,yes,yes,yes,80
+ST-001,Reformed Dogmatics (바빙크 개혁교의학),Herman Bavinck,Baker,2003,english,systematic_theology,reformed,,4권,1,yes,yes,yes,yes,yes,yes,95
+BG-001,The IVP Bible Background Commentary NT,Keener,IVP,1993,english,background,jewish_context,,,2,yes,yes,no,no,no,no,80
+BG-002,Zondervan Illustrated Bible Backgrounds Commentary,Keener et al.,Zondervan,2009,english,background,jewish_context,,,2,yes,yes,no,no,no,no,80
