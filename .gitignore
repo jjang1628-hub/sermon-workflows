@@ -1,57 +1,60 @@
+# ──────────────────────────────────────────────────────────────
+# sermon-workflows .gitignore — 95점 버전
+# ──────────────────────────────────────────────────────────────
+
 # Python
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-.Python
-*.egg-info/
-dist/
-build/
-.eggs/
-venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
 .venv/
+venv/
 env/
 
-# 환경 변수 / API 키 (절대 커밋 금지)
+# Environment / secrets (절대 커밋 금지)
 .env
 .env.*
-*.env
-secrets.py
-api_keys.py
+*.pem
+*.key
+*secret*
+*credentials*
+*token*
 
-# 출력 파일 (재생성 가능 — 용량 절약)
+# Output / generated files (재생성 가능)
 output/
+outputs/
+dist/
 build/
+.cache/
 
-# 임시 파일
+# Temporary / scratch
+tmp/*.md
+tmp/*.txt
+tmp/*.log
 tmp/prompts/
-*.tmp
-*.log
-*.bak
-
-# Logos 캡처 원본은 포함 (연구 자산)
-# tmp/logos-capture/raw/ 는 포함
-!tmp/
-!tmp/logos-capture/
-!tmp/logos-capture/raw/
-!tmp/logos-capture/raw/**
-!tmp/logos-capture/validated/
-!tmp/logos-capture/validated/**
-# validated 하위 파일도 포함
-tmp/logos-capture/validated/*.tmp
-
-# 임시 처리 파일
 tmp/slides/
-tmp/*.tmp
 
-# Windows
+# ★ Logos 캡처 원본은 연구 자산 — 포함 유지
+# tmp/logos-capture/raw/**  → git에 포함
+# tmp/logos-capture/validated/**  → git에 포함
+# tmp/logos-capture/*.md (classification 등 생성물) → 제외 (위에서 처리)
+
+# Ollama / local model files
+.ollama/
+models/
+
+# OS / editor
+.DS_Store
 Thumbs.db
-Desktop.ini
-*.lnk
-
-# VS Code
 .vscode/settings.json
 .vscode/launch.json
+.idea/
 
-# Claude / AI 캐시
-.claude_cache/
+# Logs
+*.log
+logs/
