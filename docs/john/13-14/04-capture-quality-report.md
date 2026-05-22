@@ -1,8 +1,8 @@
 # Capture Quality Report - 요한복음 13:14
 
-- 감사 시각: 2026-05-22 09:56:51
-- 캡처 파일 수: 5
-- 통합 텍스트 길이: 13,767자
+- 감사 시각: 2026-05-22 10:27:47
+- 캡처 파일 수: 6
+- 통합 텍스트 길이: 16,787자
 
 ## Capture Quality Score
 
@@ -18,6 +18,7 @@
 - `tmp\logos-capture\raw\john-13-1-17-word-study-20260521.md` (7,167 bytes)
 - `tmp\logos-capture\raw\john-13-1-bible-encyclopedia-20260521.md` (3,586 bytes)
 - `tmp\logos-capture\raw\john-13-14-passage-guide-20260521.md` (3,893 bytes)
+- `tmp\logos-capture\raw\structure-discourse.md` (6,238 bytes)
 
 ## 자료군별 품질
 
