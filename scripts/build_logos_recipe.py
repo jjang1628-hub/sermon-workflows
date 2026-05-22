@@ -1,11 +1,11 @@
 """
-build_logos_recipe.py — Logos 연구 레시피 + 캡처 체크리스트 생성기
+build_logos_recipe.py - Logos research recipe and capture checklist builder.
 
-passage.yaml을 읽어 장르별 Logos 도구 사용 순서와 캡처 체크리스트를 생성한다.
+Reads docs/{book}/{passage}/00-passage.yaml and writes:
+- 01-logos-recipe.md
+- 02-logos-capture-checklist.md
 
-사용법:
-    python scripts/build_logos_recipe.py --passage docs/john/13-14/00-passage.yaml
-    python scripts/build_logos_recipe.py --passage docs/john/13-14/00-passage.yaml --output-dir docs/john/13-14
+No external YAML dependency is required.
 """
 
 from __future__ import annotations
@@ -15,358 +15,273 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-try:
-    import yaml
-    _YAML_AVAILABLE = True
-except ImportError:
-    _YAML_AVAILABLE = False
-
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-CONFIG_DIR = Path("config")
+
+CATEGORY_TOOLS = {
+    "text_establishment": ("본문 확정", "Passage Guide, Bible panel, Text Comparison"),
+    "translation_comparison": ("번역 비교", "Text Comparison"),
+    "original_language": ("원어·문법", "Exegetical Guide, Bible Word Study, Interlinear"),
+    "structure_discourse": ("구조·담화", "Passage Analysis, Clause Search, Discourse resources"),
+    "cross_references": ("교차본문", "Cross References, Important Passages, Treasury of Scripture Knowledge"),
+    "commentaries": ("주석 비교", "Passage Guide > Commentaries"),
+    "biblical_theology": ("성경신학", "Factbook themes, Biblical Theology resources"),
+    "systematic_theology": ("조직신학", "Theology Guide, Systematic Theology resources"),
+    "background": ("역사·문화 배경", "Factbook, Bible Dictionaries, Atlas"),
+    "sermon_homiletics": ("설교 자료", "Sermon Starter Guide, Sermon Builder"),
+    "application_pastoral": ("목회·적용", "Pastoral theology, counseling resources, notes"),
+    "media_teaching": ("시각·교육 자료", "Media, Visual Copy, Atlas images"),
+}
 
 
-def load_yaml(path: Path) -> dict:
-    if not _YAML_AVAILABLE:
-        # yaml 없을 때 간단한 파서 (key: value 형식만 지원)
-        data = {}
-        for line in path.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if line.startswith("#") or not line or line.startswith("-"):
-                continue
-            if ": " in line:
-                k, v = line.split(": ", 1)
-                data[k.strip()] = v.strip().strip('"')
-        return data
-    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+GENRE_RECIPES = {
+    "gospel": [
+        "text_establishment", "translation_comparison", "original_language",
+        "structure_discourse", "cross_references", "commentaries",
+        "biblical_theology", "background", "application_pastoral",
+    ],
+    "gospel_farewell_discourse": [
+        "text_establishment", "translation_comparison", "structure_discourse",
+        "original_language", "cross_references", "commentaries",
+        "biblical_theology", "application_pastoral", "background",
+    ],
+    "gospel_symbolic_action": [
+        "text_establishment", "structure_discourse", "original_language",
+        "background", "biblical_theology", "commentaries", "application_pastoral",
+    ],
+    "gospel_discipleship": [
+        "text_establishment", "structure_discourse", "cross_references",
+        "biblical_theology", "application_pastoral", "commentaries",
+    ],
+    "gospel_parable": [
+        "text_establishment", "structure_discourse", "background",
+        "commentaries", "biblical_theology", "application_pastoral",
+    ],
+    "gospel_miracle": [
+        "text_establishment", "structure_discourse", "cross_references",
+        "commentaries", "biblical_theology", "background",
+    ],
+    "epistle": [
+        "text_establishment", "translation_comparison", "structure_discourse",
+        "original_language", "commentaries", "cross_references",
+        "systematic_theology", "biblical_theology", "application_pastoral",
+    ],
+    "epistle_doctrinal": [
+        "text_establishment", "structure_discourse", "original_language",
+        "commentaries", "systematic_theology", "biblical_theology",
+    ],
+    "epistle_exhortation": [
+        "text_establishment", "structure_discourse", "original_language",
+        "application_pastoral", "commentaries", "biblical_theology",
+    ],
+    "torah_law": [
+        "text_establishment", "background", "original_language",
+        "cross_references", "biblical_theology", "commentaries",
+    ],
+    "torah_narrative": [
+        "text_establishment", "structure_discourse", "background",
+        "cross_references", "biblical_theology", "commentaries",
+    ],
+    "psalm_lament": [
+        "text_establishment", "structure_discourse", "original_language",
+        "cross_references", "biblical_theology", "commentaries",
+    ],
+    "psalm_praise": [
+        "text_establishment", "structure_discourse", "original_language",
+        "biblical_theology", "commentaries",
+    ],
+    "prophetic_judgment": [
+        "text_establishment", "background", "structure_discourse",
+        "cross_references", "commentaries", "biblical_theology",
+    ],
+    "prophetic_restoration": [
+        "text_establishment", "background", "cross_references",
+        "commentaries", "biblical_theology", "application_pastoral",
+    ],
+}
+
+
+GENRE_EMPHASIS = {
+    "gospel_farewell_discourse": [
+        "고별 담화 전체 흐름",
+        "제자 공동체 형성",
+        "십자가 전 문맥",
+        "사랑과 순종의 관계",
+        "그리스도의 낮아지심",
+    ],
+    "gospel_symbolic_action": [
+        "상징 행위와 십자가 연결",
+        "행위가 설명되는 문맥",
+        "과도한 알레고리 경계",
+    ],
+    "gospel_discipleship": [
+        "명령 이전의 은혜",
+        "제자 공동체의 삶",
+        "도덕주의 위험 점검",
+    ],
+}
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Logos 연구 레시피와 캡처 체크리스트를 생성합니다."
-    )
-    parser.add_argument("--passage", required=True, help="passage.yaml 경로")
-    parser.add_argument("--output-dir", default=None,
-                        help="출력 폴더 (기본값: passage.yaml과 같은 폴더)")
+    parser = argparse.ArgumentParser(description="Build Logos research recipe and checklist.")
+    parser.add_argument("--passage", required=True, help="Path to 00-passage.yaml")
+    parser.add_argument("--output-dir", default=None, help="Output directory")
     return parser.parse_args()
 
 
-GENRE_PRIORITY = {
-    "gospel": [
-        ("CAT-01", "본문 확정", "Passage Guide + Text Comparison"),
-        ("CAT-02", "원어·문법", "Exegetical Guide + Bible Word Study"),
-        ("CAT-05", "주석 비교", "Passage Guide > Commentaries (최소 3권)"),
-        ("CAT-04", "교차본문", "Cross References + 병행복음서 비교"),
-        ("CAT-03", "구조·담화", "Passage Analysis — 화자/청자/장면 전환"),
-        ("CAT-08", "역사·문화 배경", "Factbook + Bible Dictionaries"),
-        ("CAT-06", "성경신학", "Factbook Themes + Biblical Theology"),
-        ("CAT-09", "설교 자료", "Sermon Starter Guide (보조)"),
-        ("CAT-07", "조직신학", "Theology Guide (보조)"),
-        ("CAT-10", "목회·적용", "Pastoral resources (보조)"),
-    ],
-    "epistle": [
-        ("CAT-01", "본문 확정", "Passage Guide + Text Comparison"),
-        ("CAT-02", "원어·문법", "Exegetical Guide + Bible Word Study — 신학 핵심어"),
-        ("CAT-03", "구조·담화", "Clause Search — indicative/imperative 구분"),
-        ("CAT-05", "주석 비교", "Passage Guide > Commentaries (최소 3권)"),
-        ("CAT-04", "교차본문", "Cross References + OT 인용 확인"),
-        ("CAT-07", "조직신학", "Theology Guide — 교리 연결"),
-        ("CAT-06", "성경신학", "Biblical Theology — 구속사 위치"),
-        ("CAT-09", "설교 자료", "Sermon Starter Guide (보조)"),
-        ("CAT-10", "목회·적용", "Pastoral resources (보조)"),
-    ],
-    "psalm_wisdom": [
-        ("CAT-01", "본문 확정", "Passage Guide — 시편 장르 확인"),
-        ("CAT-02", "원어·문법", "Bible Word Study — 히브리 병행법 확인"),
-        ("CAT-03", "구조·담화", "Passage Analysis — 키아즘·병행법 구조"),
-        ("CAT-05", "주석 비교", "Commentaries (최소 2권)"),
-        ("CAT-06", "성경신학", "Biblical Theology — 예배·지혜 테마"),
-        ("CAT-04", "교차본문", "Cross References — 신약 성취"),
-        ("CAT-08", "역사·문화 배경", "Factbook — 성전 예배 맥락"),
-    ],
-    "ot_narrative": [
-        ("CAT-01", "본문 확정", "Passage Guide + Text Comparison"),
-        ("CAT-03", "구조·담화", "Passage Analysis — 장면·인물·플롯"),
-        ("CAT-08", "역사·문화 배경", "Factbook + Bible Dictionaries + Atlas"),
-        ("CAT-05", "주석 비교", "Commentaries (최소 2권)"),
-        ("CAT-04", "교차본문", "Cross References — 신약 성취"),
-        ("CAT-06", "성경신학", "Biblical Theology — 구속사 위치"),
-        ("CAT-02", "원어·문법", "Bible Word Study — 필요 시"),
-    ],
-    "prophetic": [
-        ("CAT-01", "본문 확정", "Passage Guide + Text Comparison"),
-        ("CAT-08", "역사·문화 배경", "Factbook — 역사적 배경·왕·시대"),
-        ("CAT-02", "원어·문법", "Exegetical Guide"),
-        ("CAT-04", "교차본문", "Cross References — 신약 성취"),
-        ("CAT-05", "주석 비교", "Commentaries (최소 2권)"),
-        ("CAT-06", "성경신학", "Biblical Theology"),
-    ],
-    "law_ritual": [
-        ("CAT-01", "본문 확정", "Passage Guide"),
-        ("CAT-08", "역사·문화 배경", "Factbook — 제사·정결 의식 배경"),
-        ("CAT-02", "원어·문법", "Bible Word Study"),
-        ("CAT-04", "교차본문", "Cross References — 히브리서 성취"),
-        ("CAT-05", "주석 비교", "Commentaries (최소 2권)"),
-        ("CAT-06", "성경신학", "Biblical Theology — 그림자/실체 구조"),
-    ],
-}
-
-GENRE_CAUTIONS = {
-    "gospel": [
-        "인물 영웅화 금지 — 제자·바리새인을 단순 예화로 사용하지 마십시오.",
-        "기적·비유: 감동 이야기가 아닌 구속사적 의미를 먼저 확인하십시오.",
-        "그리스도 중심: 인물 이야기가 아닌 그리스도의 행동과 말씀에 초점을 두십시오.",
-        "병행 복음서 비교를 반드시 하십시오.",
-    ],
-    "epistle": [
-        "indicative(하나님이 하신 일) → imperative(우리의 응답) 구조를 반드시 확인하십시오.",
-        "imperative만 설교하는 도덕주의를 피하십시오.",
-        "핵심 신학 용어를 원어로 확인하십시오.",
-    ],
-    "psalm_wisdom": [
-        "시편을 단순 감정 예화로 사용하지 마십시오.",
-        "잠언을 번영 신학으로 연결하지 마십시오.",
-        "메시아 시편의 기독론적 해석: 억지 연결 금지.",
-    ],
-    "ot_narrative": [
-        "인물 영웅화 금지 — 아브라함·모세·다윗을 도덕 모범으로 제시하지 마십시오.",
-        "구속사 경유 없이 역사 사건 → 현대 적용 직결 금지.",
-        "신약과의 연결이 본문 자체의 논리에서 나와야 합니다.",
-    ],
-    "prophetic": [
-        "예언 = 현대 사건 예측으로 연결하지 마십시오.",
-        "묵시 상징의 과도한 현대화 금지.",
-    ],
-    "law_ritual": [
-        "율법 직접 적용 금지 — 그리스도 안에서의 성취 경유 필수.",
-        "의식법을 현대 생활로 직결하지 마십시오.",
-    ],
-}
+def load_yaml_simple(path: Path) -> dict[str, str]:
+    data: dict[str, str] = {}
+    current_key = ""
+    list_values: list[str] = []
+    for raw_line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if current_key and stripped.startswith("-"):
+            list_values.append(stripped.lstrip("- ").strip().strip('"'))
+            data[current_key] = ", ".join(list_values)
+            continue
+        current_key = ""
+        list_values = []
+        if ":" in stripped:
+            key, value = stripped.split(":", 1)
+            key = key.strip()
+            value = value.strip().strip('"')
+            if value:
+                data[key] = value
+            else:
+                current_key = key
+                data[key] = ""
+    return data
 
 
-def generate_recipe(passage_data: dict, output_dir: Path) -> Path:
-    book_korean = passage_data.get("book_korean", "")
-    passage = passage_data.get("passage", "")
-    context = passage_data.get("context_range", "")
-    genre = passage_data.get("genre", "gospel")
-    subgenre = passage_data.get("subgenre", "")
-    theme_hint = passage_data.get("theme_hint", "")
-    today = datetime.now().strftime("%Y-%m-%d")
+def recipe_for_genre(genre: str) -> list[str]:
+    return GENRE_RECIPES.get(genre, GENRE_RECIPES["gospel"])
 
-    priority_list = GENRE_PRIORITY.get(genre, GENRE_PRIORITY["gospel"])
-    cautions = GENRE_CAUTIONS.get(genre, [])
+
+def make_capture_filename(data: dict[str, str], category_key: str) -> str:
+    book_slug = data.get("book_slug", "book")
+    passage_slug = data.get("passage_slug", "passage")
+    date = datetime.now().strftime("%Y%m%d")
+    return f"tmp/logos-capture/raw/{book_slug}-{passage_slug}-{category_key}-{date}.md"
+
+
+def generate_recipe(data: dict[str, str], output_dir: Path) -> Path:
+    book_korean = data.get("book_korean", "")
+    passage = data.get("passage", "")
+    context = data.get("context_range", "")
+    genre = data.get("genre", "gospel")
+    secondary = data.get("secondary_genres", "")
+    theme = data.get("theme_hint", "")
+    categories = recipe_for_genre(genre)
 
     lines = [
-        f"# Logos 연구 레시피 — {book_korean} {passage}",
+        f"# Logos 연구 레시피 - {book_korean} {passage}",
         "",
-        f"**생성일**: {today}  ",
-        f"**본문**: {book_korean} {context}  ",
-        f"**장르**: {genre}",
-        f"**하위장르**: {subgenre}" if subgenre else "",
-        f"**테마 힌트**: {theme_hint}" if theme_hint else "",
+        f"- 본문: {book_korean} {context}",
+        f"- 장르: `{genre}`",
+        f"- 보조 장르: {secondary or '없음'}",
+        f"- 주제 힌트: {theme or '없음'}",
         "",
-        "> 이 레시피대로 Logos를 순서대로 사용한 뒤,",
-        "> 각 도구에서 캡처한 내용을 `tmp/logos-capture/raw/` 에 저장하십시오.",
+        "이 레시피의 목적은 AI가 먼저 설교하지 못하게 하고, Logos 자료를 먼저 충분히 보게 만드는 것입니다.",
         "",
-        "---",
+        "## 장르 핵심 강조점",
+        "",
+    ]
+    emphasis = GENRE_EMPHASIS.get(genre, ["본문 문맥", "주석 비교", "정경 연결", "복음적 적용"])
+    lines += [f"- {item}" for item in emphasis]
+
+    lines += [
         "",
         "## Logos 도구 사용 순서",
         "",
-        "| 순서 | 자료군 | 사용 도구 |",
-        "|-----|--------|---------|",
+        "| 순서 | 자료군 | Logos 도구 | 캡처 파일 제안 |",
+        "|---:|---|---|---|",
     ]
-
-    for i, (cat_id, label, tools) in enumerate(priority_list, 1):
-        lines.append(f"| {i} | {label} | {tools} |")
+    for index, category_key in enumerate(categories, 1):
+        label, tools = CATEGORY_TOOLS[category_key]
+        lines.append(
+            f"| {index} | {label} | {tools} | `{make_capture_filename(data, category_key)}` |"
+        )
 
     lines += [
         "",
-        "---",
+        "## 다음 단계",
         "",
-        "## 각 도구별 세부 지시",
-        "",
-    ]
-
-    for i, (cat_id, label, tools) in enumerate(priority_list, 1):
-        lines += [
-            f"### {i}. {label}",
-            f"**도구**: {tools}  ",
-            f"**캡처 파일명**: `tmp/logos-capture/raw/{passage_data.get('book_slug', 'book')}-"
-            f"{passage_data.get('passage_slug', 'pass')}-{label.replace('·', '-').replace(' ', '-').lower()}-"
-            f"{today[:10].replace('-', '')}.md`",
-            "",
-        ]
-
-    lines += [
-        "---",
-        "",
-        "## 장르별 설교 주의사항",
-        "",
-    ]
-    for c in cautions:
-        lines.append(f"- ⚠️ {c}")
-
-    lines += [
-        "",
-        "---",
-        "",
-        "## 캡처 완료 후 다음 단계",
+        "1. 아래 체크리스트 파일을 열고 Logos에서 자료를 캡처하십시오.",
+        "2. 캡처 파일은 `tmp/logos-capture/raw/`에 저장하십시오.",
+        "3. Coverage audit과 Capture quality audit을 실행하십시오.",
         "",
         "```powershell",
-        f"python scripts/audit_logos_coverage.py --passage {output_dir / '00-passage.yaml'}",
+        f"python scripts/run_logos_max.py --passage {output_dir / '00-passage.yaml'} --step audit",
         "```",
-        "",
-        "> Logos Coverage Score가 75점 이상이면 심층 연구로 진행합니다.",
     ]
+    path = output_dir / "01-logos-recipe.md"
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
 
-    recipe_path = output_dir / "01-logos-recipe.md"
-    recipe_path.write_text("\n".join(l for l in lines if l is not None), encoding="utf-8")
-    return recipe_path
 
-
-def generate_checklist(passage_data: dict, output_dir: Path) -> Path:
-    book_korean = passage_data.get("book_korean", "")
-    passage = passage_data.get("passage", "")
-    context = passage_data.get("context_range", "")
-    genre = passage_data.get("genre", "gospel")
-    today = datetime.now().strftime("%Y-%m-%d")
+def generate_checklist(data: dict[str, str], output_dir: Path) -> Path:
+    book_korean = data.get("book_korean", "")
+    passage = data.get("passage", "")
+    context = data.get("context_range", "")
+    genre = data.get("genre", "gospel")
+    categories = recipe_for_genre(genre)
 
     lines = [
-        f"# Logos 캡처 체크리스트 — {book_korean} {passage}",
+        f"# Logos 캡처 체크리스트 - {book_korean} {passage}",
         "",
-        f"**본문**: {book_korean} {context}  ",
-        f"**장르**: {genre}  ",
-        f"**생성일**: {today}",
+        f"- 본문: {book_korean} {context}",
+        f"- 장르: `{genre}`",
         "",
-        "> 아래 항목을 Logos에서 순서대로 실행하십시오.",
-        "> 각 항목 완료 후 `[x]`로 표시하고, 캡처 파일명을 기록하십시오.",
+        "체크리스트는 설교문을 빨리 만들기 위한 것이 아니라, 본문 아래 충분히 머물기 위한 장치입니다.",
         "",
-        "---",
-        "",
-        "## 필수 캡처 (모든 항목 완료 후 다음 단계 진행)",
-        "",
-        "- [ ] **C-01** 본문 범위 확정 (Passage Guide)",
-        "  - 캡처 파일: ___",
-        "  - 확정 범위: ___",
-        "",
-        "- [ ] **C-02** 번역 비교 (Text Comparison)",
-        "  - 캡처 파일: ___",
-        "  - 비교 번역본: ___",
-        "",
-        "- [ ] **C-03** 원어 핵심 단어 (Exegetical Guide / Bible Word Study)",
-        "  - 캡처 파일: ___",
-        "  - 확인한 단어: ___",
-        "",
-        "- [ ] **C-04** 교차본문 (Cross References)",
-        "  - 캡처 파일: ___",
-        "  - 선택한 교차본문 수: ___",
-        "",
-        "- [ ] **C-05** 주석 비교 (Commentaries)",
-        "  - 캡처 파일: ___",
-        "  - 확인한 주석: ___",
-        "",
-        "---",
-        "",
-        "## 권장 캡처 (장르: {})".format(genre),
+        "## 필수/권장 캡처",
         "",
     ]
-
-    genre_recommended = {
-        "gospel": [
-            ("C-06", "구조·담화 분석 (Passage Analysis)"),
-            ("C-07", "역사·문화 배경 (Factbook)"),
-            ("C-08", "성경신학 테마 (Biblical Theology)"),
-            ("C-09", "설교 자료 (Sermon Starter Guide)"),
-        ],
-        "epistle": [
-            ("C-06", "구조·담화 (Clause Search — indicative/imperative)"),
-            ("C-08", "성경신학 테마 (Biblical Theology)"),
-            ("C-09", "설교 자료 (Sermon Starter Guide)"),
-        ],
-        "psalm_wisdom": [
-            ("C-06", "구조·담화 (병행법·키아즘 분석)"),
-            ("C-07", "역사·문화 배경 (성전 예배 맥락)"),
-            ("C-08", "성경신학 테마"),
-        ],
-        "ot_narrative": [
-            ("C-06", "구조·담화 (장면·인물·플롯)"),
-            ("C-07", "역사·문화 배경 (Factbook + Atlas)"),
-            ("C-08", "성경신학 테마"),
-        ],
-        "prophetic": [
-            ("C-07", "역사·문화 배경 (왕·시대·정치 상황)"),
-            ("C-08", "성경신학 테마"),
-        ],
-        "law_ritual": [
-            ("C-07", "역사·문화 배경 (제사·정결 의식)"),
-            ("C-08", "성경신학 테마 (그림자/실체)"),
-        ],
-    }
-
-    for cid, title in genre_recommended.get(genre, []):
+    for index, category_key in enumerate(categories, 1):
+        label, tools = CATEGORY_TOOLS[category_key]
         lines += [
-            f"- [ ] **{cid}** {title}",
-            "  - 캡처 파일: ___",
+            f"### {index}. {label}",
+            f"- [ ] Logos 도구: {tools}",
+            f"- [ ] 캡처 파일: `{make_capture_filename(data, category_key)}`",
+            "- [ ] 본문 이해에 실제로 기여하는 요약 또는 메모 포함",
             "",
         ]
 
     lines += [
-        "---",
-        "",
-        "## 캡처 파일 명명 규칙",
-        "",
-        "```",
-        f"tmp/logos-capture/raw/{{book-slug}}-{{passage-slug}}-{{tool}}-{{YYYYMMDD}}.md",
-        "",
-        "예시:",
-        f"  tmp/logos-capture/raw/{passage_data.get('book_slug', 'book')}-"
-        f"{passage_data.get('passage_slug', 'pass')}-passage-guide-{today[:10].replace('-', '')}.md",
-        f"  tmp/logos-capture/raw/{passage_data.get('book_slug', 'book')}-"
-        f"{passage_data.get('passage_slug', 'pass')}-word-study-{today[:10].replace('-', '')}.md",
-        "```",
-        "",
-        "---",
-        "",
-        "## 모든 필수 항목 완료 후",
+        "## 완료 후 실행",
         "",
         "```powershell",
         f"python scripts/audit_logos_coverage.py --passage {output_dir / '00-passage.yaml'}",
+        f"python scripts/audit_capture_quality.py --passage {output_dir / '00-passage.yaml'}",
+        f"python scripts/gate_deep_research.py --passage {output_dir / '00-passage.yaml'}",
         "```",
     ]
-
-    checklist_path = output_dir / "02-logos-capture-checklist.md"
-    checklist_path.write_text("\n".join(lines), encoding="utf-8")
-    return checklist_path
+    path = output_dir / "02-logos-capture-checklist.md"
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
 
 
 def main() -> int:
     args = parse_args()
     passage_path = Path(args.passage)
-
     if not passage_path.exists():
-        print(f"[ERROR] passage.yaml을 찾을 수 없습니다: {passage_path}", file=sys.stderr)
-        print("  먼저 실행하십시오: python scripts/create_passage.py ...", file=sys.stderr)
+        print(f"[ERROR] passage.yaml 없음: {passage_path}", file=sys.stderr)
         return 1
 
-    passage_data = load_yaml(passage_path)
+    data = load_yaml_simple(passage_path)
     output_dir = Path(args.output_dir) if args.output_dir else passage_path.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    recipe_path = generate_recipe(passage_data, output_dir)
-    checklist_path = generate_checklist(passage_data, output_dir)
+    recipe_path = generate_recipe(data, output_dir)
+    checklist_path = generate_checklist(data, output_dir)
 
-    book_korean = passage_data.get("book_korean", "")
-    passage = passage_data.get("passage", "")
-    print(f"✅ 레시피 생성: {recipe_path}")
-    print(f"✅ 체크리스트 생성: {checklist_path}")
-    print()
-    print(f"다음 단계:")
-    print(f"  1. {checklist_path} 를 열어 Logos에서 순서대로 캡처하십시오.")
-    print(f"  2. 캡처 파일을 tmp/logos-capture/raw/ 에 저장하십시오.")
-    print(f"  3. python scripts/audit_logos_coverage.py --passage {passage_path}")
-
+    print(f"레시피 생성: {recipe_path}")
+    print(f"체크리스트 생성: {checklist_path}")
     return 0
 
 

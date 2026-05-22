@@ -1,0 +1,151 @@
+# Logos Capture Quality Rules - Logos-Max v2.1
+#
+# Coverage Score는 "필요한 자료군이 있는가"를 본다.
+# Capture Quality Score는 "그 자료가 본문 연구와 설교 방향에 실제로 기여하는가"를 본다.
+
+version: "2.1"
+
+commentaries:
+  label: "주석 비교"
+  points: 20
+  min_sources: 2
+  required_elements:
+    interpretive_summary:
+      label: "각 주석의 핵심 해석 요약"
+      keywords: ["주석", "해석", "설명", "본문은", "견해", "commentary", "Keener", "Carson", "Culpepper"]
+    interpretive_comparison:
+      label: "주석 간 해석 비교 또는 차이"
+      keywords: ["비교", "차이", "견해", "반면", "동의", "다르게", "논쟁", "agree", "disagree"]
+    sermon_application:
+      label: "설교 반영 판단"
+      keywords: ["설교", "강단", "적용", "반영", "Big Idea", "sermon", "implication"]
+  warning_if_missing:
+    - "주석 견해가 2개 미만입니다."
+    - "해석 차이점이 정리되지 않았습니다."
+    - "설교 반영 판단이 없습니다."
+
+cross_references:
+  label: "교차본문"
+  points: 15
+  min_references: 3
+  required_elements:
+    connection_reason:
+      label: "연결 이유 명시"
+      keywords: ["교차", "참조", "연결", "관련", "이유", "cross reference", "connection"]
+    canonical_direction:
+      label: "정경적 방향 확인"
+      keywords: ["정경", "구속사", "성취", "예표", "구약", "신약", "canonical", "redemptive"]
+    risk_check:
+      label: "억지 연결 위험 점검"
+      keywords: ["주의", "경계", "억지", "과도", "무리", "알레고리", "risk"]
+  warning_if_missing:
+    - "교차본문 연결 이유가 부족합니다."
+    - "억지 연결 위험 검토가 없습니다."
+
+biblical_theology:
+  label: "성경신학"
+  points: 20
+  required_elements:
+    covenant_connection:
+      label: "언약/구속 연결"
+      keywords: ["언약", "구속", "구원", "covenant", "redemption"]
+    redemptive_history:
+      label: "구속사 위치 확인"
+      keywords: ["구속사", "창조", "타락", "새창조", "역사", "흐름", "redemptive history"]
+    christ_fulfillment:
+      label: "그리스도 성취 논리"
+      keywords: ["그리스도", "예수", "십자가", "부활", "성취", "완성", "Christ"]
+    anti_allegory:
+      label: "억지 알레고리 경계"
+      keywords: ["알레고리", "억지", "경계", "본문 의미", "자연스럽", "anti-allegory"]
+  warning_if_missing:
+    - "그리스도 성취 논리가 약합니다."
+    - "정경적 위치 설명이 부족합니다."
+    - "억지 알레고리 위험 점검이 없습니다."
+
+original_language:
+  label: "원어·문법"
+  points: 15
+  max_public_terms: 3
+  required_elements:
+    key_terms:
+      label: "핵심 원어 후보 선정"
+      keywords: ["원어", "헬라어", "히브리어", "Greek", "νίπτω", "λούω", "ὀφείλετε", "μέρος", "εἰς τέλος"]
+    contextual_meaning:
+      label: "본문 문맥에서의 의미"
+      keywords: ["문맥", "본문에서", "의미", "context", "usage", "여기서"]
+    sermon_relevance:
+      label: "설교에 실제 기여"
+      keywords: ["설교", "강단", "중요한 이유", "선명", "relevance", "implication"]
+    overuse_warning:
+      label: "원어 과시 위험 점검"
+      keywords: ["과시", "주의", "최대", "3개", "필요한", "생략", "overuse"]
+  warning_if_missing:
+    - "원어가 본문 의미를 실제로 선명하게 하는지 불분명합니다."
+    - "원어 과시 위험 점검이 없습니다."
+
+structure_discourse:
+  label: "구조·담화"
+  points: 10
+  required_elements:
+    paragraph_flow:
+      label: "단락 흐름 분석"
+      keywords: ["흐름", "단락", "구조", "먼저", "이후", "therefore", "flow"]
+    repetition_contrast:
+      label: "반복·대조 관찰"
+      keywords: ["반복", "대조", "반면", "그러나", "contrast", "repetition"]
+    turning_point:
+      label: "전환점 또는 절정 확인"
+      keywords: ["전환", "절정", "핵심", "climax", "turning point"]
+  warning_if_missing:
+    - "단락 흐름 분석이 부족합니다."
+    - "반복·대조·전환 관찰이 부족합니다."
+
+background:
+  label: "역사·문화 배경"
+  points: 10
+  required_elements:
+    relevant_background:
+      label: "본문 이해에 기여하는 배경"
+      keywords: ["배경", "문화", "당시", "유대", "로마", "종", "발 씻김", "background"]
+    textual_contribution:
+      label: "배경이 본문 의미에 기여하는 방식"
+      keywords: ["본문 이해", "의미", "기여", "따라서", "so that", "contribution"]
+    overuse_warning:
+      label: "배경 정보 과용 경계"
+      keywords: ["주의", "과도", "직접", "필요한 범위", "overuse"]
+  warning_if_missing:
+    - "배경 정보가 본문 해석에 어떻게 기여하는지 불분명합니다."
+
+application_pastoral:
+  label: "목회·적용"
+  points: 10
+  required_elements:
+    false_gospel_diagnosis:
+      label: "청중의 자기구원 방식 진단"
+      keywords: ["자기구원", "인정", "불안", "정죄", "회피", "거짓 복음", "false gospel"]
+    gospel_motive:
+      label: "복음의 은혜에서 출발하는 적용"
+      keywords: ["복음", "은혜", "먼저 씻김", "사랑받았기에", "gospel motive"]
+    one_obedience:
+      label: "이번 주 한 가지 구체적 순종"
+      keywords: ["이번 주", "한 순종", "구체", "실천", "one obedience"]
+  warning_if_missing:
+    - "오늘 청중의 자기구원 방식 진단이 부족합니다."
+    - "복음의 은혜에서 출발하는 적용 구조가 약합니다."
+    - "이번 주 한 순종이 분명하지 않습니다."
+
+thresholds:
+  logos_max_deep_eligible:
+    coverage: 90
+    quality: 80
+  deep_eligible:
+    coverage: 75
+    quality: 70
+  review_required:
+    coverage: 75
+    quality: 60
+  capture_incomplete:
+    coverage: 60
+  quality_blocked:
+    quality: 60

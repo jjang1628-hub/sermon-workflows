@@ -1,32 +1,16 @@
 """
-run_logos_max.py — Logos-Max v2 마스터 파이프라인
+run_logos_max.py - Logos-Max v2.1 master pipeline
 
-새 본문 연구 시작부터 심층 연구 통과까지의 전체 흐름을 실행한다.
+Pipeline:
+  1. passage.yaml 확인/생성
+  2. Logos recipe 생성
+  3. capture checklist 생성
+  4. Coverage audit
+  5. Capture quality audit
+  6. Combined gate decision
+  7. Gate 통과 시에만 deep research 실행
 
-Logos-Max v2 흐름:
-  0. passage.yaml 확인 / 생성
-  1. Logos 연구 레시피 생성
-  2. Logos 캡처 체크리스트 생성
-  3. 캡처 파일 존재 여부 확인
-  4. Coverage Audit 실행
-  5. Coverage Gate — 기준 미달 시 중단
-  6. (통과 시) deep research 실행
-
-사용법:
-    # 새 본문 시작
-    python scripts/run_logos_max.py --book John --passage 13:14 --context 13:1-17 --genre gospel
-
-    # 이미 passage.yaml이 있는 경우
-    python scripts/run_logos_max.py --passage docs/john/13-14/00-passage.yaml
-
-    # 캡처 완료 후 coverage 감사만
-    python scripts/run_logos_max.py --passage docs/john/13-14/00-passage.yaml --step audit
-
-    # coverage 통과 후 deep research 실행
-    python scripts/run_logos_max.py --passage docs/john/13-14/00-passage.yaml --step deep
-
-    # coverage 점수와 무관하게 deep research 강행 (테스트용)
-    python scripts/run_logos_max.py --passage docs/john/13-14/00-passage.yaml --force-deep
+This is a Logos-first gate system, not a direct sermon generator.
 """
 
 from __future__ import annotations
@@ -45,89 +29,89 @@ SCRIPTS_DIR = Path("scripts")
 
 
 def run(cmd: list[str], check: bool = True) -> int:
-    """서브프로세스 실행 후 returncode 반환."""
+    print(f"\n$ {' '.join(cmd)}")
     result = subprocess.run(cmd)
-    if check and result.returncode not in (0, 1):
-        print(f"[ERROR] 명령 실패 (exit {result.returncode}): {' '.join(cmd)}", file=sys.stderr)
+    if check and result.returncode != 0:
+        print(f"[ERROR] 명령 실패(exit {result.returncode}): {' '.join(cmd)}", file=sys.stderr)
     return result.returncode
 
 
-def load_yaml_simple(path: Path) -> dict:
-    data = {}
-    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
-        line = line.strip()
-        if line.startswith("#") or not line or line.startswith("-"):
+def load_yaml_simple(path: Path) -> dict[str, str]:
+    data: dict[str, str] = {}
+    for raw_line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#") or stripped.startswith("-"):
             continue
-        if ": " in line:
-            k, v = line.split(": ", 1)
-            data[k.strip()] = v.strip().strip('"')
+        if ":" in stripped:
+            key, value = stripped.split(":", 1)
+            data[key.strip()] = value.strip().strip('"')
     return data
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Logos-Max v2 마스터 파이프라인"
+    parser = argparse.ArgumentParser(description="Run the Logos-Max v2.1 Logos-first workflow.")
+    parser.add_argument("--book", default=None, help="Book name for new passage, e.g. John")
+    parser.add_argument("--passage", default=None, help="Path to passage.yaml or passage ref, e.g. 13:14")
+    parser.add_argument("--context", default=None, help="Context range for new passage, e.g. 13:1-17")
+    parser.add_argument("--genre", default=None, help="Genre, e.g. gospel_farewell_discourse")
+    parser.add_argument("--theme-hint", default="", help="Theme hint for new passage")
+    parser.add_argument(
+        "--step",
+        choices=["setup", "recipe", "audit", "quality", "gate", "deep", "all"],
+        default="all",
+        help="Pipeline step to run",
     )
-    # 새 본문 시작 옵션
-    parser.add_argument("--book", default=None, help="영어 책 이름 (신규 시작 시)")
-    parser.add_argument("--passage", default=None,
-                        help="passage.yaml 경로 또는 새 본문 (e.g. 13:14)")
-    parser.add_argument("--context", default=None, help="문맥 범위 (신규 시작 시)")
-    parser.add_argument("--genre", default=None, help="장르 (신규 시작 시)")
-    parser.add_argument("--theme-hint", default="", help="테마 힌트")
-
-    # 실행 제어
-    parser.add_argument("--step",
-                        choices=["setup", "recipe", "audit", "gate", "deep", "all"],
-                        default="all",
-                        help="실행 단계 (기본: all)")
-    parser.add_argument("--min-score", type=int, default=75,
-                        help="Coverage Gate 최소 점수 (기본: 75)")
-    parser.add_argument("--force-deep", action="store_true",
-                        help="Coverage 점수와 무관하게 deep research 실행")
-    parser.add_argument("--capture-dir", default="tmp/logos-capture/raw",
-                        help="캡처 파일 폴더")
-
-    # Deep research 옵션
-    parser.add_argument("--model", default=None, help="Claude 모델")
-    parser.add_argument("--skip-ollama", action="store_true", help="Ollama 건너뛰기")
-
+    parser.add_argument("--capture-dir", default="tmp/logos-capture/raw", help="Raw Logos capture directory")
+    parser.add_argument("--force-deep", action="store_true", help="Override gate and run deep research")
+    parser.add_argument("--force-reason", default="", help="Required with --force-deep")
+    parser.add_argument("--model", default=None, help="Claude model for downstream deep research")
+    parser.add_argument("--skip-ollama", action="store_true", help="Pass through to deep research pipeline")
     return parser.parse_args()
 
 
-def find_passage_yaml(args: argparse.Namespace) -> Path | None:
-    """passage.yaml 경로를 결정한다."""
-    if args.passage and args.passage.endswith(".yaml"):
-        p = Path(args.passage)
-        return p if p.exists() else None
+def infer_book_folder(book: str) -> str:
+    book_map = {
+        "John": "john",
+        "Romans": "romans",
+        "Matthew": "matthew",
+        "Mark": "mark",
+        "Luke": "luke",
+        "Acts": "acts",
+        "Genesis": "genesis",
+        "Exodus": "exodus",
+        "Psalms": "psalms",
+    }
+    return book_map.get(book, book.lower())
 
-    # --book + --passage 조합으로 경로 추론
+
+def find_passage_yaml(args: argparse.Namespace) -> Path | None:
+    if args.passage and args.passage.endswith(".yaml"):
+        path = Path(args.passage)
+        return path if path.exists() else None
+
     if args.book and args.passage:
-        book_map = {
-            "John": "john", "Romans": "romans", "Matthew": "matthew",
-            "Mark": "mark", "Luke": "luke", "Acts": "acts",
-            "Genesis": "genesis", "Exodus": "exodus", "Psalms": "psalms",
-        }
-        book_folder = book_map.get(args.book, args.book.lower())
+        folder = infer_book_folder(args.book)
         slug = args.passage.replace(":", "-")
-        p = Path("docs") / book_folder / slug / "00-passage.yaml"
-        return p if p.exists() else None
+        path = Path("docs") / folder / slug / "00-passage.yaml"
+        return path if path.exists() else None
 
     return None
 
 
 def step_setup(args: argparse.Namespace) -> tuple[int, Path | None]:
-    """0단계: passage.yaml 생성"""
     if not args.book or not args.passage or not args.context:
-        print("[ERROR] 신규 시작에는 --book, --passage, --context 가 모두 필요합니다.",
-              file=sys.stderr)
+        print("[ERROR] 새 passage.yaml 생성에는 --book, --passage, --context가 필요합니다.", file=sys.stderr)
         return 1, None
 
     cmd = [
-        sys.executable, str(SCRIPTS_DIR / "create_passage.py"),
-        "--book", args.book,
-        "--passage", args.passage,
-        "--context", args.context,
+        sys.executable,
+        str(SCRIPTS_DIR / "create_passage.py"),
+        "--book",
+        args.book,
+        "--passage",
+        args.passage,
+        "--context",
+        args.context,
     ]
     if args.genre:
         cmd += ["--genre", args.genre]
@@ -135,154 +119,153 @@ def step_setup(args: argparse.Namespace) -> tuple[int, Path | None]:
         cmd += ["--theme-hint", args.theme_hint]
 
     rc = run(cmd)
-    if rc != 0:
-        return rc, None
-
-    # 생성된 passage.yaml 경로 추론
-    passage_yaml = find_passage_yaml(args)
-    return 0, passage_yaml
+    return rc, find_passage_yaml(args)
 
 
 def step_recipe(passage_yaml: Path) -> int:
-    """1–2단계: 레시피 + 체크리스트 생성"""
     return run([
-        sys.executable, str(SCRIPTS_DIR / "build_logos_recipe.py"),
-        "--passage", str(passage_yaml),
+        sys.executable,
+        str(SCRIPTS_DIR / "build_logos_recipe.py"),
+        "--passage",
+        str(passage_yaml),
     ])
 
 
-def step_audit(passage_yaml: Path, capture_dir: str) -> int:
-    """4단계: Coverage Audit"""
+def step_coverage_audit(passage_yaml: Path, capture_dir: str) -> int:
     return run([
-        sys.executable, str(SCRIPTS_DIR / "audit_logos_coverage.py"),
-        "--passage", str(passage_yaml),
-        "--capture-dir", capture_dir,
-    ], check=False)  # exit 1 = 보류 (오류 아님)
+        sys.executable,
+        str(SCRIPTS_DIR / "audit_logos_coverage.py"),
+        "--passage",
+        str(passage_yaml),
+        "--capture-dir",
+        capture_dir,
+    ], check=False)
 
 
-def step_gate(passage_yaml: Path, min_score: int, force: bool) -> int:
-    """5단계: Coverage Gate"""
+def step_quality_audit(passage_yaml: Path, capture_dir: str) -> int:
+    return run([
+        sys.executable,
+        str(SCRIPTS_DIR / "audit_capture_quality.py"),
+        "--passage",
+        str(passage_yaml),
+        "--capture-dir",
+        capture_dir,
+    ], check=False)
+
+
+def step_gate(passage_yaml: Path, force: bool, reason: str) -> int:
     cmd = [
-        sys.executable, str(SCRIPTS_DIR / "gate_deep_research.py"),
-        "--passage", str(passage_yaml),
-        "--min-score", str(min_score),
+        sys.executable,
+        str(SCRIPTS_DIR / "gate_deep_research.py"),
+        "--passage",
+        str(passage_yaml),
     ]
     if force:
-        cmd.append("--force")
+        cmd += ["--force", "--reason", reason]
     return run(cmd, check=False)
 
 
 def step_deep(passage_yaml: Path, args: argparse.Namespace) -> int:
-    """6단계: Deep Research"""
     data = load_yaml_simple(passage_yaml)
-    book_korean = data.get("book_korean", "")
+    book_korean = data.get("book_korean", data.get("book", ""))
     passage = data.get("passage", "")
-    passage_str = f"{book_korean} {passage}"
+    passage_label = f"{book_korean} {passage}".strip()
 
     cmd = [
-        sys.executable, str(SCRIPTS_DIR / "run_logos_max_research.py"),
-        "--passage", passage_str,
+        sys.executable,
+        str(SCRIPTS_DIR / "run_logos_max_research.py"),
+        "--passage",
+        passage_label,
     ]
     if args.skip_ollama:
         cmd.append("--skip-ollama")
     if args.model:
         cmd += ["--model", args.model]
-
-    # 캡처 파일 지정
     capture_dir = Path(args.capture_dir)
     if capture_dir.exists():
         cmd += ["--capture-dir", str(capture_dir)]
-
     return run(cmd)
 
 
-def print_banner(title: str) -> None:
-    print(f"\n{'─'*55}")
+def ensure_capture_files(capture_dir: Path, force: bool) -> bool:
+    has_files = capture_dir.exists() and bool(list(capture_dir.glob("*.md")) or list(capture_dir.glob("*.txt")))
+    if has_files or force:
+        return True
+    print(f"\n[PAUSED] 캡처 파일이 없습니다: {capture_dir}")
+    print("Logos에서 체크리스트에 따라 자료를 캡처한 뒤 다시 실행하십시오.")
+    return False
+
+
+def banner(title: str) -> None:
+    print("\n" + "=" * 60)
     print(f"  {title}")
-    print(f"{'─'*55}\n")
+    print("=" * 60)
 
 
 def main() -> int:
     args = parse_args()
+    banner("Logos-Max v2.1 - Logos-first Sermon Workflow")
 
-    print_banner("Logos-Max v2 — Sermon Research Pipeline")
-
-    # passage.yaml 경로 결정
     passage_yaml = find_passage_yaml(args)
 
-    step = args.step
-
-    # === 0단계: setup ===
-    if passage_yaml is None or step == "setup":
-        print_banner("0단계: passage.yaml 생성")
+    if passage_yaml is None or args.step == "setup":
+        banner("1. passage.yaml 확인/생성")
         rc, passage_yaml = step_setup(args)
         if rc != 0 or passage_yaml is None:
-            print("\n[STOPPED] passage.yaml 생성 실패")
+            print("[STOPPED] passage.yaml을 준비하지 못했습니다.")
             return 1
-        if step == "setup":
+        if args.step == "setup":
             return 0
 
     if not passage_yaml.exists():
         print(f"[ERROR] passage.yaml 없음: {passage_yaml}", file=sys.stderr)
-        print("  python scripts/create_passage.py --book ... --passage ... --context ...",
-              file=sys.stderr)
         return 1
 
     data = load_yaml_simple(passage_yaml)
-    book_korean = data.get("book_korean", "")
-    passage_ref = data.get("passage", "")
-    print(f"본문: {book_korean} {passage_ref}")
-    print(f"장르: {data.get('genre', '—')}")
+    print(f"본문: {data.get('book_korean', data.get('book', ''))} {data.get('passage', '')}")
+    print(f"장르: {data.get('genre', '')}")
 
-    # === 1–2단계: recipe ===
-    if step in ("all", "recipe"):
-        print_banner("1–2단계: Logos 레시피 + 체크리스트 생성")
+    if args.step in ("all", "recipe"):
+        banner("2-3. Logos recipe + capture checklist")
         rc = step_recipe(passage_yaml)
         if rc != 0:
             return rc
-        if step == "recipe":
-            print("\n체크리스트를 열어 Logos에서 캡처를 진행하십시오.")
-            print(f"  {passage_yaml.parent / '02-logos-capture-checklist.md'}")
+        if args.step == "recipe":
+            print(f"\n체크리스트: {passage_yaml.parent / '02-logos-capture-checklist.md'}")
             return 0
 
-    # === 3단계: 캡처 확인 (audit 이전) ===
-    if step in ("all", "audit", "gate", "deep"):
-        capture_dir = Path(args.capture_dir)
-        if not capture_dir.exists() or not list(capture_dir.glob("*.md")):
-            if not args.force_deep:
-                print(f"\n[PAUSED] 캡처 파일이 없습니다: {capture_dir}")
-                print()
-                print("  Logos에서 아래 체크리스트를 따라 캡처하십시오:")
-                print(f"  {passage_yaml.parent / '02-logos-capture-checklist.md'}")
-                print()
-                print("  캡처 완료 후 재실행:")
-                print(f"  python scripts/run_logos_max.py --passage {passage_yaml} --step audit")
-                return 0
-
-    # === 4단계: audit ===
-    if step in ("all", "audit", "gate", "deep"):
-        print_banner("4단계: Logos Coverage Audit")
-        audit_rc = step_audit(passage_yaml, args.capture_dir)
-        if step == "audit":
+    capture_dir = Path(args.capture_dir)
+    if args.step in ("all", "audit", "quality", "gate", "deep"):
+        if not ensure_capture_files(capture_dir, args.force_deep):
             return 0
 
-    # === 5단계: gate ===
-    if step in ("all", "gate", "deep"):
-        print_banner("5단계: Coverage Gate")
-        gate_rc = step_gate(passage_yaml, args.min_score, args.force_deep)
-        if gate_rc == 2:
-            print("\n[STOPPED] 필수 자료 누락 — 파이프라인을 중단합니다.")
-            return 1
-        elif gate_rc == 1 and not args.force_deep:
-            print("\n[PAUSED] 보강 권장 — deep research를 보류합니다.")
-            print("  Logos에서 누락 자료를 보강하거나 --force-deep 으로 진행하십시오.")
-            return 0
-        if step == "gate":
+    if args.step in ("all", "audit", "gate", "deep"):
+        banner("4. Coverage audit")
+        step_coverage_audit(passage_yaml, args.capture_dir)
+        if args.step == "audit":
+            banner("5. Capture quality audit")
+            step_quality_audit(passage_yaml, args.capture_dir)
             return 0
 
-    # === 6단계: deep research ===
-    if step in ("all", "deep"):
-        print_banner("6단계: Logos-Max Deep Research")
+    if args.step in ("quality",):
+        banner("5. Capture quality audit")
+        return 0 if step_quality_audit(passage_yaml, args.capture_dir) in (0, 1) else 1
+
+    if args.step in ("all", "gate", "deep"):
+        banner("5. Capture quality audit")
+        step_quality_audit(passage_yaml, args.capture_dir)
+
+        banner("6. Combined gate decision")
+        gate_rc = step_gate(passage_yaml, args.force_deep, args.force_reason)
+        if args.step == "gate":
+            return 0 if gate_rc == 0 else gate_rc
+        if gate_rc != 0:
+            print("\n[STOPPED] Gate 기준을 통과하지 못해 deep research를 실행하지 않습니다.")
+            print("누락 자료 또는 약한 자료군을 보강한 뒤 다시 실행하십시오.")
+            return 0 if gate_rc == 1 else 1
+
+    if args.step in ("all", "deep"):
+        banner("7. Deep research")
         return step_deep(passage_yaml, args)
 
     return 0

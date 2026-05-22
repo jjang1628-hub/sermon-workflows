@@ -1,68 +1,61 @@
-# Logos 캡처 체크리스트 — 요한복음 13:14
+# Logos 캡처 체크리스트 - 요한복음 13:14
 
-**본문**: 요한복음 13:1-17  
-**장르**: gospel  
-**생성일**: 2026-05-22
+- 본문: 요한복음 13:1-17
+- 장르: `gospel_farewell_discourse`
 
-> 아래 항목을 Logos에서 순서대로 실행하십시오.
-> 각 항목 완료 후 `[x]`로 표시하고, 캡처 파일명을 기록하십시오.
+체크리스트는 설교문을 빨리 만들기 위한 것이 아니라, 본문 아래 충분히 머물기 위한 장치입니다.
 
----
+## 필수/권장 캡처
 
-## 필수 캡처 (모든 항목 완료 후 다음 단계 진행)
+### 1. 본문 확정
+- [ ] Logos 도구: Passage Guide, Bible panel, Text Comparison
+- [ ] 캡처 파일: `tmp/logos-capture/raw/jn-13-14-text_establishment-20260522.md`
+- [ ] 본문 이해에 실제로 기여하는 요약 또는 메모 포함
 
-- [ ] **C-01** 본문 범위 확정 (Passage Guide)
-  - 캡처 파일: ___
-  - 확정 범위: ___
+### 2. 번역 비교
+- [ ] Logos 도구: Text Comparison
+- [ ] 캡처 파일: `tmp/logos-capture/raw/jn-13-14-translation_comparison-20260522.md`
+- [ ] 본문 이해에 실제로 기여하는 요약 또는 메모 포함
 
-- [ ] **C-02** 번역 비교 (Text Comparison)
-  - 캡처 파일: ___
-  - 비교 번역본: ___
+### 3. 구조·담화
+- [ ] Logos 도구: Passage Analysis, Clause Search, Discourse resources
+- [ ] 캡처 파일: `tmp/logos-capture/raw/jn-13-14-structure_discourse-20260522.md`
+- [ ] 본문 이해에 실제로 기여하는 요약 또는 메모 포함
 
-- [ ] **C-03** 원어 핵심 단어 (Exegetical Guide / Bible Word Study)
-  - 캡처 파일: ___
-  - 확인한 단어: ___
+### 4. 원어·문법
+- [ ] Logos 도구: Exegetical Guide, Bible Word Study, Interlinear
+- [ ] 캡처 파일: `tmp/logos-capture/raw/jn-13-14-original_language-20260522.md`
+- [ ] 본문 이해에 실제로 기여하는 요약 또는 메모 포함
 
-- [ ] **C-04** 교차본문 (Cross References)
-  - 캡처 파일: ___
-  - 선택한 교차본문 수: ___
+### 5. 교차본문
+- [ ] Logos 도구: Cross References, Important Passages, Treasury of Scripture Knowledge
+- [ ] 캡처 파일: `tmp/logos-capture/raw/jn-13-14-cross_references-20260522.md`
+- [ ] 본문 이해에 실제로 기여하는 요약 또는 메모 포함
 
-- [ ] **C-05** 주석 비교 (Commentaries)
-  - 캡처 파일: ___
-  - 확인한 주석: ___
+### 6. 주석 비교
+- [ ] Logos 도구: Passage Guide > Commentaries
+- [ ] 캡처 파일: `tmp/logos-capture/raw/jn-13-14-commentaries-20260522.md`
+- [ ] 본문 이해에 실제로 기여하는 요약 또는 메모 포함
 
----
+### 7. 성경신학
+- [ ] Logos 도구: Factbook themes, Biblical Theology resources
+- [ ] 캡처 파일: `tmp/logos-capture/raw/jn-13-14-biblical_theology-20260522.md`
+- [ ] 본문 이해에 실제로 기여하는 요약 또는 메모 포함
 
-## 권장 캡처 (장르: gospel)
+### 8. 목회·적용
+- [ ] Logos 도구: Pastoral theology, counseling resources, notes
+- [ ] 캡처 파일: `tmp/logos-capture/raw/jn-13-14-application_pastoral-20260522.md`
+- [ ] 본문 이해에 실제로 기여하는 요약 또는 메모 포함
 
-- [ ] **C-06** 구조·담화 분석 (Passage Analysis)
-  - 캡처 파일: ___
+### 9. 역사·문화 배경
+- [ ] Logos 도구: Factbook, Bible Dictionaries, Atlas
+- [ ] 캡처 파일: `tmp/logos-capture/raw/jn-13-14-background-20260522.md`
+- [ ] 본문 이해에 실제로 기여하는 요약 또는 메모 포함
 
-- [ ] **C-07** 역사·문화 배경 (Factbook)
-  - 캡처 파일: ___
-
-- [ ] **C-08** 성경신학 테마 (Biblical Theology)
-  - 캡처 파일: ___
-
-- [ ] **C-09** 설교 자료 (Sermon Starter Guide)
-  - 캡처 파일: ___
-
----
-
-## 캡처 파일 명명 규칙
-
-```
-tmp/logos-capture/raw/{book-slug}-{passage-slug}-{tool}-{YYYYMMDD}.md
-
-예시:
-  tmp/logos-capture/raw/jn-13-14-passage-guide-20260522.md
-  tmp/logos-capture/raw/jn-13-14-word-study-20260522.md
-```
-
----
-
-## 모든 필수 항목 완료 후
+## 완료 후 실행
 
 ```powershell
 python scripts/audit_logos_coverage.py --passage docs\john\13-14\00-passage.yaml
+python scripts/audit_capture_quality.py --passage docs\john\13-14\00-passage.yaml
+python scripts/gate_deep_research.py --passage docs\john\13-14\00-passage.yaml
 ```

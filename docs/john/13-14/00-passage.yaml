@@ -1,5 +1,4 @@
-# passage.yaml — Logos-Max Sermon Workflow v2
-# 이 파일이 있어야 레시피·체크리스트·커버리지 감사가 실행됩니다.
+# passage.yaml - Logos-Max Sermon Workflow v2.1
 
 book: John
 book_korean: 요한복음
@@ -7,26 +6,27 @@ book_slug: jn
 passage: "13:14"
 passage_slug: "13-14"
 context_range: "13:1-17"
-genre: gospel
-subgenre: "farewell-discourse"
+genre: gospel_farewell_discourse
+secondary_genres:
+  - gospel_symbolic_action
+  - gospel_discipleship
 sermon_mode: preaching
 target_audience: adult_congregation
-theme_hint: "씻김 받은 자의 섬김 — 사랑의 권세에서 나오는 낮아짐"
+theme_hint: "씻김 받은 자의 섬김 — 끝까지 사랑하신 주님의 낮아지심"
 
-# 자동 생성 정보
 created: "2026-05-22"
-workflow_version: "logos-max-v2"
+workflow_version: "logos-max-v2.1"
 
-# 참고: 이 본문으로 완성된 설교 패키지
-# sermon_final: docs/john/13-14/sermon-final.md
-# delivery: docs/john/13-14/sermon-delivery-compression.md
-# ppt: docs/john/13-14/ppt-outline-preaching.md
-# small_group_member: docs/john/13-14/small-group-guide-member.md
-# rehearsal: docs/john/13-14/rehearsal-guide.md
+# Preserved sermon package
+sermon_final: docs/john/13-14/sermon-final.md
+delivery: docs/john/13-14/sermon-delivery-compression.md
+ppt: docs/john/13-14/ppt-outline-preaching.md
+small_group_member: docs/john/13-14/small-group-guide-member.md
+rehearsal: docs/john/13-14/rehearsal-guide.md
 
-# 다음 단계 (새 본문 시 참고)
+# Logos-first next steps
 # 1. python scripts/build_logos_recipe.py --passage docs/john/13-14/00-passage.yaml
-# 2. Logos에서 캡처 실행 → tmp/logos-capture/raw/에 저장
+# 2. Logos 공식 UI / Copy / Export / Print로 tmp/logos-capture/raw/에 자료 저장
 # 3. python scripts/audit_logos_coverage.py --passage docs/john/13-14/00-passage.yaml
-# 4. python scripts/gate_deep_research.py --passage docs/john/13-14/00-passage.yaml
-# 5. (통과 시) python scripts/run_logos_max_research.py --passage "요한복음 13:14"
+# 4. python scripts/audit_capture_quality.py --passage docs/john/13-14/00-passage.yaml
+# 5. python scripts/gate_deep_research.py --passage docs/john/13-14/00-passage.yaml
