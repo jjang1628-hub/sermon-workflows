@@ -192,6 +192,13 @@ def collect_captures(capture_dir: Path, book_slug: str, passage_slug: str) -> li
     matched: list[Path] = []
 
     for file_path in all_files:
+        try:
+            preview = file_path.read_text(encoding="utf-8", errors="replace")[:1200].lower()
+        except OSError:
+            preview = ""
+        if "capture_status: template" in preview:
+            continue
+
         stem = file_path.stem.lower()
         compact = stem.replace("-", "").replace("_", "")
         exact_match = any(f"{alias}{passage_clean}" in compact for alias in aliases)
@@ -199,7 +206,13 @@ def collect_captures(capture_dir: Path, book_slug: str, passage_slug: str) -> li
             stem.startswith(f"{alias}-{chapter}-") or f"-{chapter}-" in stem
             for alias in aliases
         )
-        if exact_match or chapter_match:
+        content_match = (
+            f"passage_ref: john {passage_slug.replace('-', ':')}" in preview
+            or f"passage_ref: 요한복음 {passage_slug.replace('-', ':')}" in preview
+            or f"john {passage_slug.replace('-', ':')}" in preview
+            or f"요한복음 {passage_slug.replace('-', ':')}" in preview
+        )
+        if exact_match or chapter_match or content_match:
             matched.append(file_path)
 
     if not matched:

@@ -1,10 +1,10 @@
 # Force Override Log
 
 - Passage: 요한복음 13:14
-- Timestamp: 2026-05-22 09:39:50
+- Timestamp: 2026-05-22 09:56:11
 - Coverage Score: 60
 - Capture Quality Score: 85
-- Override Reason: v2.1 gate verification
+- Override Reason: v2.1 force override 기능 검증
 
 ## Missing Categories
 

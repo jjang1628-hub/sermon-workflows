@@ -1,26 +1,28 @@
-# Logos Coverage Report — 요한복음 13:14
+# Logos Coverage Report - 요한복음 13:14
 
-**감사일**: 2026-05-22  
-**캡처 파일 수**: 1개  
-**총 텍스트**: 2,763자
+- 감사일: 2026-05-22
+- 캡처 파일 수: 5
+- 통합 텍스트 길이: 13,767자
 
----
-
-## 종합 점수
+## Coverage Score
 
 ### 60 / 100점
 
-**상태**: `review_required`  
-**판정**: 보강 필요 — deep_research 보류 권장
+- status: `review_required`
+- 판정: 보강 필요, deep research 보류 권장
 
-> 🔴 Logos 자료 보강이 필요합니다. 아래 누락 항목을 캡처하십시오.
+## 사용한 캡처 파일
 
----
+- `tmp\logos-capture\raw\jn-13-14-uia-passage-workflow.md` (4,580 bytes)
+- `tmp\logos-capture\raw\john-13-1-17-passage-guide-20260521.md` (5,997 bytes)
+- `tmp\logos-capture\raw\john-13-1-17-word-study-20260521.md` (7,167 bytes)
+- `tmp\logos-capture\raw\john-13-1-bible-encyclopedia-20260521.md` (3,586 bytes)
+- `tmp\logos-capture\raw\john-13-14-passage-guide-20260521.md` (3,893 bytes)
 
 ## 항목별 점수
 
 | 항목 | 배점 | 획득 | 상태 |
-|------|------|------|------|
+|---|---:|---:|---|
 | 본문 범위·문맥 확인 | 10 | 10 | ✅ |
 | 번역 비교 | 10 | 10 | ✅ |
 | 원어·문법 | 15 | 15 | ✅ |
@@ -34,33 +36,30 @@
 | 목회·적용 자료 | 5 | 0 | ❌ |
 | **합계** | **100** | **60** | |
 
----
-
-## 누락 항목 (캡처 필요)
+## 누락 자료군
 
 ### ❌ R-04 — 구조·담화 (0/10점)
-- 현재 발견된 관련 키워드: 0개 (필요: 2개)
-- 해당 Logos 도구를 사용하여 캡처하십시오.
+- 발견 키워드: 2개 / 필요: 2개
+- 해당 Logos 자료군을 실제로 확인하고 캡처 또는 요약하십시오.
 
 ### ❌ R-05 — 교차본문 (0/10점)
-- 현재 발견된 관련 키워드: 0개 (필요: 2개)
-- 해당 Logos 도구를 사용하여 캡처하십시오.
+- 발견 키워드: 2개 / 필요: 2개
+- 해당 Logos 자료군을 실제로 확인하고 캡처 또는 요약하십시오.
 
 ### ❌ R-07 — 성경신학 (0/10점)
-- 현재 발견된 관련 키워드: 0개 (필요: 2개)
-- 해당 Logos 도구를 사용하여 캡처하십시오.
+- 발견 키워드: 2개 / 필요: 2개
+- 해당 Logos 자료군을 실제로 확인하고 캡처 또는 요약하십시오.
 
 ### ❌ R-09 — 역사·문화 배경 (0/5점)
-- 현재 발견된 관련 키워드: 1개 (필요: 2개)
-- 해당 Logos 도구를 사용하여 캡처하십시오.
+- 발견 키워드: 5개 / 필요: 2개
+- 해당 Logos 자료군을 실제로 확인하고 캡처 또는 요약하십시오.
 
 ### ❌ R-11 — 목회·적용 자료 (0/5점)
-- 현재 발견된 관련 키워드: 1개 (필요: 2개)
-- 해당 Logos 도구를 사용하여 캡처하십시오.
+- 발견 키워드: 2개 / 필요: 2개
+- 해당 Logos 자료군을 실제로 확인하고 캡처 또는 요약하십시오.
 
----
 
-## 완료된 항목
+## 통과 자료군
 
 - ✅ R-01 본문 범위·문맥 확인 (10/10점)
 - ✅ R-02 번역 비교 (10/10점)
@@ -69,12 +68,11 @@
 - ✅ R-08 조직신학 (5/5점)
 - ✅ R-10 설교 자료 (5/5점)
 
----
-
 ## 다음 단계
 
-누락 항목을 Logos에서 캡처한 후 재실행하십시오:
+Coverage는 자료군 존재 여부만 평가합니다. 이어서 Capture Quality를 확인하십시오.
 
 ```powershell
-python scripts/audit_logos_coverage.py --passage docs\john\13-14\00-passage.yaml
+python scripts/audit_capture_quality.py --passage docs\john\13-14\00-passage.yaml
+python scripts/gate_deep_research.py --passage docs\john\13-14\00-passage.yaml
 ```

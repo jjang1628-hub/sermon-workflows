@@ -61,6 +61,13 @@ python scripts/run_logos_max.py `
 - 유료 리소스 대량 추출
 - 라이선스 우회
 
+Actual-use 원칙:
+
+- AI 예시는 Logos 캡처의 대체물이 아닙니다.
+- Logos에서 실제 확인한 자료만 raw capture로 인정합니다.
+- 템플릿 파일은 `capture_status: template` 상태에서는 Coverage/Quality 감사에서 제외됩니다.
+- 템플릿을 실제 캡처로 사용하려면 Logos Sources Checked를 채우고 `capture_status: actual`로 바꾸십시오.
+
 ### 4. Coverage + Quality 감사
 
 ```powershell
@@ -114,6 +121,13 @@ python scripts/run_logos_max.py `
 생성 파일:
 
 - `docs/john/13-14/force-override-log.md`
+
+운영 원칙:
+
+- deep research는 Coverage와 Quality Gate 통과 후 실행합니다.
+- `--force`는 테스트 또는 예외 상황에서만 사용합니다.
+- Gate 통과 후에도 `05-logos-integration-summary.md`가 없으면 deep research로 바로 가지 않습니다.
+- Integration Summary는 Logos 연구 통찰을 설교 방향으로 넘기기 전의 마지막 분별 기록입니다.
 
 ## 설치
 

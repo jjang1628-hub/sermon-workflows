@@ -187,6 +187,16 @@ def step_deep(passage_yaml: Path, args: argparse.Namespace) -> int:
     return run(cmd)
 
 
+def ensure_integration_summary(passage_yaml: Path) -> bool:
+    summary_path = passage_yaml.parent / "05-logos-integration-summary.md"
+    if summary_path.exists():
+        return True
+    print("\n[PAUSED] Logos Integration Summary가 없습니다.")
+    print("deep research 전에 실제 Logos 연구 통찰을 먼저 정리하십시오.")
+    print(f"필요 파일: {summary_path}")
+    return False
+
+
 def ensure_capture_files(capture_dir: Path, force: bool) -> bool:
     has_files = capture_dir.exists() and bool(list(capture_dir.glob("*.md")) or list(capture_dir.glob("*.txt")))
     if has_files or force:
@@ -265,6 +275,8 @@ def main() -> int:
             return 0 if gate_rc == 1 else 1
 
     if args.step in ("all", "deep"):
+        if not ensure_integration_summary(passage_yaml):
+            return 0
         banner("7. Deep research")
         return step_deep(passage_yaml, args)
 
