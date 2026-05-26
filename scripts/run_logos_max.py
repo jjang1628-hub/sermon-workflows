@@ -188,13 +188,111 @@ def step_deep(passage_yaml: Path, args: argparse.Namespace) -> int:
 
 
 def ensure_integration_summary(passage_yaml: Path) -> bool:
+    """05-logos-integration-summary.md가 있고 실제로 채워져 있는지 확인한다.
+
+    없으면 템플릿을 자동 생성하고 False를 반환한다.
+    파일이 있더라도 템플릿 상태(미작성)이면 경고 후 False를 반환한다.
+    실제로 채워진 경우에만 True를 반환하여 deep research로 진행한다.
+    """
     summary_path = passage_yaml.parent / "05-logos-integration-summary.md"
-    if summary_path.exists():
-        return True
-    print("\n[PAUSED] Logos Integration Summary가 없습니다.")
-    print("deep research 전에 실제 Logos 연구 통찰을 먼저 정리하십시오.")
-    print(f"필요 파일: {summary_path}")
-    return False
+
+    if not summary_path.exists():
+        _generate_integration_summary_template(passage_yaml, summary_path)
+        print("\n[PAUSED] Logos Integration Summary 템플릿을 생성했습니다.")
+        print(f"  파일: {summary_path}")
+        print("  Logos 연구에서 얻은 통찰을 직접 작성한 후 재실행하십시오.")
+        print("  (AI 결과가 아닌 목사님의 실제 Logos 탐구 내용을 기록하십시오)")
+        return False
+
+    content = summary_path.read_text(encoding="utf-8", errors="replace")
+    if "<!-- 여기에 작성" in content or content.strip() == "":
+        print("\n[PAUSED] Logos Integration Summary가 아직 채워지지 않았습니다.")
+        print(f"  파일: {summary_path}")
+        print("  <!-- 여기에 작성 --> 플레이스홀더를 실제 내용으로 교체하십시오.")
+        return False
+
+    return True
+
+
+def _generate_integration_summary_template(passage_yaml: Path, output_path: Path) -> None:
+    """Logos Integration Summary 작성 템플릿을 생성한다."""
+    data = load_yaml_simple(passage_yaml)
+    book_korean = data.get("book_korean", "")
+    passage = data.get("passage", "")
+    context = data.get("context_range", "")
+    genre = data.get("genre", "")
+
+    lines = [
+        f"# Logos Integration Summary — {book_korean} {passage}",
+        "",
+        "> **이 문서는 AI가 작성하는 것이 아닙니다.**",
+        "> Logos에서 직접 연구한 내용을 목사님이 직접 정리하는 공간입니다.",
+        "> Deep research로 넘어가기 전 마지막 분별 단계입니다.",
+        "",
+        f"- 본문: {book_korean} {context}",
+        f"- 장르: `{genre}`",
+        f"- 작성일: <!-- 여기에 작성: 오늘 날짜 -->",
+        "",
+        "---",
+        "",
+        "## 1. 본문에서 직접 발견한 것",
+        "",
+        "<!-- 여기에 작성:",
+        "Logos Passage Guide, Interlinear, 구조 분석에서 눈에 들어온 것들",
+        "원어 단어, 반복 표현, 문법적 특이점, 구조적 흐름 등 -->",
+        "",
+        "---",
+        "",
+        "## 2. 주석이 확인해 준 핵심 해석",
+        "",
+        "<!-- 여기에 작성:",
+        "사용한 주석 이름과 핵심 견해를 간략히 기록",
+        "서로 다른 견해가 있다면 그 차이도 기록",
+        "설교에 실제로 쓸 해석이 무엇인지 판단 -->",
+        "",
+        "---",
+        "",
+        "## 3. 아직 불확실한 해석 포인트",
+        "",
+        "<!-- 여기에 작성:",
+        "아직 결론 내리지 못한 해석 질문",
+        "주석 간 이견 중 어느 쪽을 택할지 모르는 것 -->",
+        "",
+        "---",
+        "",
+        "## 4. 구속사·정경적 연결",
+        "",
+        "<!-- 여기에 작성:",
+        "이 본문이 성경 전체 흐름에서 어디에 위치하는가",
+        "그리스도와의 연결 논리 (억지 알레고리 아닌 본문 자체의 논리)",
+        "구약 배경 또는 신약 성취가 있다면 기록 -->",
+        "",
+        "---",
+        "",
+        "## 5. 설교 방향의 씨앗",
+        "",
+        "<!-- 여기에 작성:",
+        "복음 프레임: 본문이 드러내는 인간의 문제는? 하나님이 그리스도 안에서 무엇을 하시는가?",
+        "적용 방향: 복음의 은혜에서 나오는 순종은?",
+        "Big Idea 초안 한 문장 -->",
+        "",
+        "---",
+        "",
+        "## 6. Deep Research에 요청할 것",
+        "",
+        "<!-- 여기에 작성:",
+        "AI 심층 분석에서 특별히 확인하고 싶은 신학적 질문",
+        "반론이 필요한 해석",
+        "더 깊이 파야 할 원어 또는 주석 포인트 -->",
+        "",
+        "---",
+        "",
+        "> 이 파일을 채운 후 재실행하십시오:",
+        "> ```powershell",
+        f"> python scripts/run_logos_max.py --passage {passage_yaml} --step deep",
+        "> ```",
+    ]
+    output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def ensure_capture_files(capture_dir: Path, force: bool) -> bool:
@@ -269,10 +367,14 @@ def main() -> int:
         gate_rc = step_gate(passage_yaml, args.force_deep, args.force_reason)
         if args.step == "gate":
             return 0 if gate_rc == 0 else gate_rc
+        if gate_rc == 1:
+            print("\n[PAUSED] 자료 보강 권장 — deep research를 보류합니다.")
+            print("누락 자료 또는 약한 자료군을 보강한 뒤 재실행하십시오.")
+            return 0
         if gate_rc != 0:
-            print("\n[STOPPED] Gate 기준을 통과하지 못해 deep research를 실행하지 않습니다.")
-            print("누락 자료 또는 약한 자료군을 보강한 뒤 다시 실행하십시오.")
-            return 0 if gate_rc == 1 else 1
+            print("\n[STOPPED] Gate 기준 미달 — deep research를 실행할 수 없습니다.")
+            print("Coverage 또는 Quality Score를 기준 이상으로 높인 후 재실행하십시오.")
+            return 1
 
     if args.step in ("all", "deep"):
         if not ensure_integration_summary(passage_yaml):

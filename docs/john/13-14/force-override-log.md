@@ -1,14 +1,13 @@
 # Force Override Log
 
 - Passage: 요한복음 13:14
-- Timestamp: 2026-05-22 09:56:11
-- Coverage Score: 60
+- Timestamp: 2026-05-26 09:00:21
+- Coverage Score: 70
 - Capture Quality Score: 85
-- Override Reason: v2.1 force override 기능 검증
+- Override Reason: 자체평가 템플릿 생성 테스트
 
 ## Missing Categories
 
-- ### ❌ R-04 — 구조·담화 (0/10점)
 - ### ❌ R-05 — 교차본문 (0/10점)
 - ### ❌ R-07 — 성경신학 (0/10점)
 - ### ❌ R-09 — 역사·문화 배경 (0/5점)
