@@ -1,113 +1,96 @@
-# Logos Coverage Rubric — Logos-Max Sermon Workflow v2
-# 각 항목의 배점과 통과 기준을 정의한다.
+# Logos Coverage Rubric - Logos-Max Sermon Workflow v2.1
+#
+# Coverage Score asks whether required Logos research categories are present.
+# It does not judge depth. Depth is evaluated by Capture Quality Score.
 
-version: "2.0"
+version: "2.1"
 
 items:
   - id: R-01
     category: text_establishment
     label: "본문 범위·문맥 확인"
     points: 10
-    check: "has_text_comparison"
-    description: "본문 경계 확인 + 번역 1개 이상 비교"
+    description: "본문 경계와 앞뒤 문맥을 확인한다."
 
   - id: R-02
-    category: text_establishment
+    category: translation_comparison
     label: "번역 비교"
     points: 10
-    check: "has_translation_comparison"
-    description: "2개 이상 번역본 실질적 비교 확인"
+    description: "주요 번역 간 차이를 확인한다."
 
   - id: R-03
     category: original_language
     label: "원어·문법"
     points: 15
-    check: "has_original_language"
-    description: "핵심 헬라어/히브리어 단어 1개 이상 + BDAG 또는 사전 정의"
+    description: "본문 의미를 실제로 선명하게 하는 핵심 원어·문법만 확인한다."
 
   - id: R-04
     category: structure_discourse
     label: "구조·담화"
     points: 10
-    check: "has_structure_analysis"
-    description: "본문 구조 분석 또는 담화 흐름 확인"
+    description: "단락 흐름, 반복, 대조, 전환, 절정을 확인한다."
 
   - id: R-05
     category: cross_references
     label: "교차본문"
     points: 10
-    check: "has_cross_references"
-    description: "교차본문 3개 이상 목록"
+    description: "정경적 연결과 억지 연결 위험을 함께 확인한다."
 
   - id: R-06
     category: commentaries
     label: "주석 비교"
     points: 15
-    check: "has_commentaries"
-    description: "주석 2권 이상 견해 포함"
+    description: "주요 주석 견해를 비교하고 설교 반영 여부를 판단한다."
 
   - id: R-07
     category: biblical_theology
     label: "성경신학"
     points: 10
-    check: "has_biblical_theology"
-    description: "신학 테마(구속, 언약 등) + 본문 연결"
+    description: "구속사, 정경 흐름, 그리스도 성취를 본문 아래에서 확인한다."
 
   - id: R-08
     category: systematic_theology
     label: "조직신학"
     points: 5
-    check: "has_systematic_theology"
-    description: "교리 항목 1개 이상 + 본문 연결"
+    description: "교리적 연결을 말씀 아래 보조 증인으로 사용한다."
 
   - id: R-09
     category: background
     label: "역사·문화 배경"
     points: 5
-    check: "has_background"
-    description: "역사·문화 배경 1개 이상"
+    description: "본문 이해에 실제로 기여하는 배경만 확인한다."
 
   - id: R-10
     category: sermon_homiletics
     label: "설교 자료"
     points: 5
-    check: "has_sermon_resources"
-    description: "설교 구조 또는 전달 아이디어 포함"
+    description: "구조와 전달 아이디어를 보조 자료로 사용한다."
 
   - id: R-11
     category: application_pastoral
-    label: "목회·적용 자료"
+    label: "목회·적용"
     points: 5
-    check: "has_application"
-    description: "복음 프레임 기반 적용 아이디어"
+    description: "원청중·오늘 청중·거짓 복음·한 순종을 점검한다."
 
 total_points: 100
 
 thresholds:
-  deep_eligible_full:
-    score: 90
-    status: "deep_eligible"
-    label: "Logos-Max 심층 연구 즉시 가능"
+  logos_max_deep_eligible:
+    coverage: 90
+    status: "logos_max_deep_eligible"
     action: "run_deep_research"
-    warning: null
 
-  deep_eligible_with_warning:
-    score: 75
-    status: "deep_eligible_with_warning"
-    label: "심층 연구 가능 (누락 경고 포함)"
-    action: "run_deep_research_with_gaps"
-    warning: "누락된 자료를 보강하면 연구 품질이 높아집니다."
+  deep_eligible:
+    coverage: 75
+    status: "deep_eligible"
+    action: "run_deep_research"
 
   review_required:
-    score: 60
+    coverage: 60
     status: "review_required"
-    label: "보강 필요 — deep_research 보류 권장"
     action: "request_more_captures"
-    warning: "Logos 캡처 자료가 부족합니다. 보강 후 진행을 권장합니다."
 
   insufficient:
-    score: 0
+    coverage: 0
     status: "insufficient"
-    label: "연구팩 불충분 — 설교 방향 생성 중단"
     action: "stop_pipeline"
-    warning: "필수 Logos 자료가 누락되었습니다. 캡처 후 재실행하십시오."

@@ -1,4 +1,4 @@
-# sermon-workflows 새 컴퓨터 셋업 가이드
+﻿# sermon-workflows 새 컴퓨터 셋업 가이드
 
 ## 1. Python 설치
 
@@ -36,7 +36,7 @@ ollama ps
 
 환경 변수 설정 (PowerShell):
 ```powershell
-$env:ANTHROPIC_API_KEY = "sk-ant-..."
+$env:ANTHROPIC_API_KEY = "<ANTHROPIC_API_KEY>"
 ```
 
 영구 설정 (Windows 시스템 환경 변수):
@@ -95,3 +95,4 @@ python scripts/run_logos_max_research.py `
 ```
 
 Exit:0 이면 설정 완료.
+

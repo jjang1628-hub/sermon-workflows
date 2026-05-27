@@ -11,6 +11,7 @@ No external YAML dependency is required.
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -220,7 +221,11 @@ def generate_recipe(data: dict[str, str], output_dir: Path) -> Path:
         "```",
     ]
     path = output_dir / "01-logos-recipe.md"
-    path.write_text("\n".join(lines), encoding="utf-8")
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text("\n".join(lines), encoding="utf-8")
+    if path.exists():
+        shutil.copy2(path, path.with_suffix(".bak"))
+    shutil.move(str(tmp), str(path))
     return path
 
 
@@ -262,7 +267,11 @@ def generate_checklist(data: dict[str, str], output_dir: Path) -> Path:
         "```",
     ]
     path = output_dir / "02-logos-capture-checklist.md"
-    path.write_text("\n".join(lines), encoding="utf-8")
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text("\n".join(lines), encoding="utf-8")
+    if path.exists():
+        shutil.copy2(path, path.with_suffix(".bak"))
+    shutil.move(str(tmp), str(path))
     return path
 
 

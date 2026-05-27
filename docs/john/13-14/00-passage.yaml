@@ -6,23 +6,38 @@ book_slug: jn
 passage: "13:14"
 passage_slug: "13-14"
 context_range: "13:1-17"
+
 genre: gospel_farewell_discourse
 secondary_genres:
   - gospel_symbolic_action
   - gospel_discipleship
+
 sermon_mode: preaching
 target_audience: adult_congregation
-theme_hint: "씻김 받은 자의 섬김 — 끝까지 사랑하신 주님의 낮아지심"
+theme_hint: "씻김 받은 자의 섬김 - 십자가까지 끝까지 사랑하신 주님의 낮아지심"
+
+core_texts:
+  - John 13:1
+  - John 13:3
+  - John 13:8
+  - John 13:14
+
+sermon_guardrails:
+  - "요 13:14를 단독 윤리 명령으로 사용하지 말 것"
+  - "13:1의 끝까지 사랑, 13:3의 정체성, 13:8의 씻김을 거쳐 13:14로 갈 것"
+  - "예수님을 단순한 섬김의 모범으로 축소하지 말 것"
+  - "발 씻김을 십자가와 연결하되 과도한 알레고리는 피할 것"
+  - "적용은 복음의 은혜에서 흘러나오게 할 것"
 
 created: "2026-05-22"
 workflow_version: "logos-max-v2.1"
 
-# Preserved sermon package
-sermon_final: docs/john/13-14/sermon-final.md
-delivery: docs/john/13-14/sermon-delivery-compression.md
-ppt: docs/john/13-14/ppt-outline-preaching.md
-small_group_member: docs/john/13-14/small-group-guide-member.md
-rehearsal: docs/john/13-14/rehearsal-guide.md
+# Preserved v1 sermon package. These are reviewed sermon assets, archived under v1/.
+sermon_final: docs/john/13-14/v1/sermon-final.md
+delivery: docs/john/13-14/v1/sermon-delivery-compression.md
+ppt: docs/john/13-14/v1/ppt-outline-preaching.md
+small_group_member: docs/john/13-14/v1/small-group-guide-member.md
+rehearsal: docs/john/13-14/v1/rehearsal-guide.md
 
 # Logos-first next steps
 # 1. python scripts/build_logos_recipe.py --passage docs/john/13-14/00-passage.yaml

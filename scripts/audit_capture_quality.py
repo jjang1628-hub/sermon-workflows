@@ -1,29 +1,24 @@
 """
-audit_capture_quality.py - Logos-Max v2.1 Capture Quality Audit
+Audit Capture Quality Score for Logos-Max v2.1.
 
-Coverage audit asks: "Do we have the needed Logos categories?"
-Quality audit asks: "Are those captures useful for exegesis, theology, and sermon direction?"
-
-This script reads official UI/export/copy based Logos capture files from
-tmp/logos-capture/raw and writes:
-
-    docs/{book}/{passage}/04-capture-quality-report.md
-
-No Logos internal database or installed resource files are accessed.
+Coverage asks whether the needed Logos categories are present.
+Quality asks whether the captured material is useful for exegesis, theological
+integration, and sermon direction.
 """
 
 from __future__ import annotations
 
 import argparse
 import re
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
 
-if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-if hasattr(sys.stderr, "reconfigure"):
-    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+from pipeline_utils import configure_utf8_stdio, load_yaml_simple
+
+
+configure_utf8_stdio()
 
 
 QUALITY_RULES: dict[str, dict] = {
@@ -31,13 +26,10 @@ QUALITY_RULES: dict[str, dict] = {
         "label": "주석 비교",
         "points": 20,
         "min_sources": 2,
-        "source_keywords": [
-            "Keener", "Carson", "Culpepper", "Beale", "Köstenberger",
-            "박대영", "김새윤", "권해생", "주석", "commentary",
-        ],
+        "source_keywords": ["Keener", "Carson", "Culpepper", "Beale", "Köstenberger", "박대영", "김새윤", "권해생", "주석", "commentary"],
         "required_elements": {
             "interpretive_summary": ["주석", "해석", "설명", "견해", "본문은", "commentary"],
-            "interpretive_comparison": ["비교", "차이", "반면", "동의", "다르게", "논쟁"],
+            "interpretive_comparison": ["비교", "차이", "반면", "동의", "다르게", "논쟁", "agree", "disagree"],
             "sermon_application": ["설교", "강단", "적용", "반영", "Big Idea", "implication"],
         },
         "warnings": [
@@ -53,7 +45,7 @@ QUALITY_RULES: dict[str, dict] = {
         "required_elements": {
             "connection_reason": ["교차", "참조", "연결", "관련", "이유", "cross reference"],
             "canonical_direction": ["정경", "구속사", "성취", "예표", "구약", "신약", "canonical"],
-            "risk_check": ["주의", "경계", "억지", "과도", "무리", "알레고리"],
+            "risk_check": ["주의", "경계", "억지", "과도", "무리", "알레고리", "risk"],
         },
         "warnings": [
             "교차본문 연결 이유가 부족합니다.",
@@ -67,7 +59,7 @@ QUALITY_RULES: dict[str, dict] = {
             "covenant_connection": ["언약", "구속", "구원", "covenant", "redemption"],
             "redemptive_history": ["구속사", "창조", "타락", "새창조", "역사", "흐름"],
             "christ_fulfillment": ["그리스도", "예수", "십자가", "부활", "성취", "완성"],
-            "anti_allegory": ["알레고리", "억지", "경계", "본문 의미", "자연스럽"],
+            "anti_allegory": ["알레고리", "억지", "경계", "본문 아래", "자연스럽", "anti-allegory"],
         },
         "warnings": [
             "그리스도 성취 논리가 약합니다.",
@@ -80,9 +72,9 @@ QUALITY_RULES: dict[str, dict] = {
         "points": 15,
         "required_elements": {
             "key_terms": ["원어", "헬라어", "Greek", "νίπτω", "λούω", "ὀφείλετε", "μέρος", "εἰς τέλος"],
-            "contextual_meaning": ["문맥", "본문에서", "의미", "context", "여기서"],
+            "contextual_meaning": ["문맥", "본문에서", "의미", "context", "usage"],
             "sermon_relevance": ["설교", "강단", "중요한 이유", "선명", "relevance"],
-            "overuse_warning": ["과시", "주의", "최대", "3개", "필요한", "생략"],
+            "overuse_warning": ["과시", "주의", "최대", "3개", "필요한", "생략", "overuse"],
         },
         "warnings": [
             "원어가 본문 의미를 실제로 선명하게 하는지 불분명합니다.",
@@ -95,7 +87,7 @@ QUALITY_RULES: dict[str, dict] = {
         "required_elements": {
             "paragraph_flow": ["흐름", "단락", "구조", "먼저", "이후", "flow"],
             "repetition_contrast": ["반복", "대조", "반면", "그러나", "contrast"],
-            "turning_point": ["전환", "절정", "핵심", "climax"],
+            "turning_point": ["전환", "절정", "핵심", "climax", "turning point"],
         },
         "warnings": [
             "단락 흐름 분석이 부족합니다.",
@@ -106,7 +98,7 @@ QUALITY_RULES: dict[str, dict] = {
         "label": "역사·문화 배경",
         "points": 10,
         "required_elements": {
-            "relevant_background": ["배경", "문화", "당시", "유대", "로마", "종", "발 씻김"],
+            "relevant_background": ["배경", "문화", "당시", "유대", "로마", "종", "발 씻김", "background"],
             "textual_contribution": ["본문 이해", "의미", "기여", "따라서", "contribution"],
             "overuse_warning": ["주의", "과도", "직접", "필요한 범위", "overuse"],
         },
@@ -118,7 +110,7 @@ QUALITY_RULES: dict[str, dict] = {
         "label": "목회·적용",
         "points": 10,
         "required_elements": {
-            "false_gospel_diagnosis": ["자기구원", "인정", "불안", "정죄", "회피", "거짓 복음"],
+            "false_gospel_diagnosis": ["자기구원", "인정", "불안", "정죄", "회피", "거짓 복음", "false gospel"],
             "gospel_motive": ["복음", "은혜", "먼저 씻김", "사랑받았기에", "gospel motive"],
             "one_obedience": ["이번 주", "한 순종", "구체", "실천", "one obedience"],
         },
@@ -129,6 +121,7 @@ QUALITY_RULES: dict[str, dict] = {
         ],
     },
 }
+
 
 BOOK_ALIASES = {
     "jn": ["jn", "john"],
@@ -153,32 +146,12 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_yaml_simple(path: Path) -> dict[str, str]:
-    data: dict[str, str] = {}
-    current_key = ""
-    list_values: list[str] = []
-
-    for raw_line in path.read_text(encoding="utf-8", errors="replace").splitlines():
-        line = raw_line.rstrip()
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        if current_key and stripped.startswith("-"):
-            list_values.append(stripped.lstrip("- ").strip().strip('"'))
-            data[current_key] = ", ".join(list_values)
-            continue
-        current_key = ""
-        list_values = []
-        if ":" in stripped:
-            key, value = stripped.split(":", 1)
-            key = key.strip()
-            value = value.strip().strip('"')
-            if value:
-                data[key] = value
-            else:
-                current_key = key
-                data[key] = ""
-    return data
+def is_template_capture(path: Path) -> bool:
+    try:
+        preview = path.read_text(encoding="utf-8", errors="replace")[:1600].lower()
+    except OSError:
+        return False
+    return "capture_status: template" in preview
 
 
 def collect_captures(capture_dir: Path, book_slug: str, passage_slug: str) -> list[Path]:
@@ -186,54 +159,50 @@ def collect_captures(capture_dir: Path, book_slug: str, passage_slug: str) -> li
     if not all_files:
         return []
 
-    aliases = BOOK_ALIASES.get(book_slug, [book_slug])
+    aliases = BOOK_ALIASES.get(book_slug, [book_slug] if book_slug else [])
     passage_clean = passage_slug.replace("-", "").replace(":", "").lower()
     chapter = passage_slug.split("-")[0] if passage_slug else ""
+    verse = passage_slug.split("-")[1] if "-" in passage_slug else ""
+    content_ref = f"{chapter}:{verse}" if chapter and verse else ""
     matched: list[Path] = []
 
     for file_path in all_files:
+        if is_template_capture(file_path):
+            continue
         try:
-            preview = file_path.read_text(encoding="utf-8", errors="replace")[:1200].lower()
+            preview = file_path.read_text(encoding="utf-8", errors="replace")[:2000].lower()
         except OSError:
             preview = ""
-        if "capture_status: template" in preview:
-            continue
 
         stem = file_path.stem.lower()
         compact = stem.replace("-", "").replace("_", "")
-        exact_match = any(f"{alias}{passage_clean}" in compact for alias in aliases)
-        chapter_match = chapter and any(
-            stem.startswith(f"{alias}-{chapter}-") or f"-{chapter}-" in stem
-            for alias in aliases
+        exact_match = aliases and any(f"{alias}{passage_clean}" in compact for alias in aliases)
+        chapter_match = chapter and aliases and any(
+            stem.startswith(f"{alias}-{chapter}-") for alias in aliases
         )
-        content_match = (
-            f"passage_ref: john {passage_slug.replace('-', ':')}" in preview
-            or f"passage_ref: 요한복음 {passage_slug.replace('-', ':')}" in preview
-            or f"john {passage_slug.replace('-', ':')}" in preview
-            or f"요한복음 {passage_slug.replace('-', ':')}" in preview
+        content_match = content_ref and (
+            f"passage_ref: john {content_ref}" in preview
+            or f"passage_ref: 요한복음 {content_ref}" in preview
+            or f"john {content_ref}" in preview
+            or f"요한복음 {content_ref}" in preview
         )
         if exact_match or chapter_match or content_match:
             matched.append(file_path)
 
     if not matched:
-        matched = sorted(all_files, key=lambda f: f.stat().st_mtime, reverse=True)[:15]
+        matched = [p for p in sorted(all_files, key=lambda f: f.stat().st_mtime, reverse=True) if not is_template_capture(p)][:15]
 
     return list(dict.fromkeys(matched))
 
 
 def count_references(text: str) -> int:
-    # Korean/English short reference pattern: 요 13:8, John 13:14, 마 10:24, 1 Cor 13:1
-    pattern = re.compile(r"(?:[1-3]\s*)?(?:[A-Za-z가-힣]{1,12})\s*\d{1,3}:\d{1,3}")
+    pattern = re.compile(r"(?:[1-3]\s*)?(?:[A-Za-z가-힣]{1,18})\s*\d{1,3}:\d{1,3}")
     return len(set(pattern.findall(text)))
 
 
 def count_sources(text: str, keywords: list[str]) -> int:
     lower = text.lower()
-    found = set()
-    for keyword in keywords:
-        if keyword.lower() in lower:
-            found.add(keyword.lower())
-    return len(found)
+    return len({keyword.lower() for keyword in keywords if keyword.lower() in lower})
 
 
 def element_passed(text_lower: str, keywords: list[str]) -> bool:
@@ -249,18 +218,14 @@ def assess_quality(text: str) -> tuple[int, list[dict]]:
         element_results = []
         for element_key, keywords in rule["required_elements"].items():
             passed = element_passed(text_lower, keywords)
-            element_results.append({
-                "id": element_key,
-                "passed": passed,
-                "keywords": keywords,
-            })
+            element_results.append({"id": element_key, "passed": passed})
 
         element_count = len(element_results)
         passed_count = sum(1 for item in element_results if item["passed"])
         ratio = passed_count / element_count if element_count else 0
 
         quantity_passed = True
-        quantity_detail = ""
+        quantity_detail = "해당 없음"
         if "min_sources" in rule:
             source_count = count_sources(text, rule.get("source_keywords", []))
             quantity_passed = source_count >= rule["min_sources"]
@@ -275,7 +240,6 @@ def assess_quality(text: str) -> tuple[int, list[dict]]:
 
         earned = round(rule["points"] * ratio)
         total += earned
-
         missing_elements = [item["id"] for item in element_results if not item["passed"]]
         results.append({
             "id": key,
@@ -295,12 +259,12 @@ def assess_quality(text: str) -> tuple[int, list[dict]]:
 
 def status_for_score(score: int) -> tuple[str, str]:
     if score >= 80:
-        return "excellent", "Logos-Max deep eligible 수준"
+        return "excellent", "자료 품질은 우수합니다. 단, Coverage Gate도 함께 통과해야 합니다."
     if score >= 70:
-        return "acceptable", "deep research 진행 가능"
+        return "acceptable", "자료 품질은 deep research 진행에 충분합니다."
     if score >= 60:
-        return "review_required", "보강 권장"
-    return "quality_blocked", "품질 미달"
+        return "review_required", "자료 품질 보강을 권장합니다."
+    return "quality_blocked", "자료 품질이 부족하여 deep research를 중단해야 합니다."
 
 
 def build_report(
@@ -312,16 +276,15 @@ def build_report(
     status_label: str,
     results: list[dict],
 ) -> str:
-    today = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    book_korean = passage_data.get("book_korean", "")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    book_korean = passage_data.get("book_korean", passage_data.get("book", ""))
     passage = passage_data.get("passage", "")
-
     weak = [item for item in results if item["points_earned"] < item["points_max"]]
 
     lines = [
         f"# Capture Quality Report - {book_korean} {passage}",
         "",
-        f"- 감사 시각: {today}",
+        f"- 감사 시각: {now}",
         f"- 캡처 파일 수: {len(captures)}",
         f"- 통합 텍스트 길이: {text_length:,}자",
         "",
@@ -335,11 +298,7 @@ def build_report(
         "## 사용한 캡처 파일",
         "",
     ]
-    if captures:
-        lines += [f"- `{path}` ({path.stat().st_size:,} bytes)" for path in captures]
-    else:
-        lines.append("- 없음")
-
+    lines += [f"- `{path}` ({path.stat().st_size:,} bytes)" for path in captures] or ["- 없음"]
     lines += [
         "",
         "## 자료군별 품질",
@@ -354,11 +313,7 @@ def build_report(
             f"{item['passed_elements']}/{item['total_elements']} | {quantity} |"
         )
 
-    lines += [
-        "",
-        "## Weak Categories",
-        "",
-    ]
+    lines += ["", "## Weak Categories", ""]
     if weak:
         for item in weak:
             lines += [
@@ -377,7 +332,7 @@ def build_report(
         "",
         "- 이 보고서는 Coverage Score를 대체하지 않습니다.",
         "- Coverage Score와 Capture Quality Score가 모두 기준을 통과해야 deep research로 넘어갑니다.",
-        "- 품질 점수가 낮으면 자료가 있어도 본문 연구에 실제로 기여하지 못한 것으로 판단합니다.",
+        "- 품질 점수가 낮으면 자료는 있어도 본문 연구에 실제로 기여하지 못한 것으로 판단합니다.",
     ]
     return "\n".join(lines)
 
@@ -392,24 +347,29 @@ def main() -> int:
         return 2
 
     passage_data = load_yaml_simple(passage_path)
-    book_slug = passage_data.get("book_slug", "")
-    passage_slug = passage_data.get("passage_slug", "")
+    captures = collect_captures(
+        capture_dir,
+        passage_data.get("book_slug", ""),
+        passage_data.get("passage_slug", ""),
+    )
 
-    captures = collect_captures(capture_dir, book_slug, passage_slug)
-    combined_text_parts = []
+    combined_parts = []
     for path in captures:
         try:
-            combined_text_parts.append(path.read_text(encoding="utf-8", errors="replace"))
+            combined_parts.append(path.read_text(encoding="utf-8", errors="replace"))
         except OSError:
             continue
-    combined_text = "\n\n".join(combined_text_parts)
+    combined_text = "\n\n".join(combined_parts)
 
     score, results = assess_quality(combined_text)
     status, status_label = status_for_score(score)
-
     output_path = Path(args.output) if args.output else passage_path.parent / "04-capture-quality-report.md"
     report = build_report(passage_data, captures, len(combined_text), score, status, status_label, results)
-    output_path.write_text(report, encoding="utf-8")
+    tmp = output_path.with_suffix(".tmp")
+    tmp.write_text(report, encoding="utf-8")
+    if output_path.exists():
+        shutil.copy2(output_path, output_path.with_suffix(".bak"))
+    shutil.move(str(tmp), str(output_path))
 
     print(f"\nCapture Quality Score: {score}/100")
     print(f"status: {status} - {status_label}")

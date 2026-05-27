@@ -1,4 +1,4 @@
-﻿"""
+"""
 validate_logos_capture.py — Logos 캡처 검증 게이트
 
 Logos 캡처 파일의 완전성을 검사하고 proceed/limited/need_more/stop 결정을 내린다.

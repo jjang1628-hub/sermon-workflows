@@ -1,4 +1,4 @@
-# sermon-workflows
+﻿# sermon-workflows
 
 **Logos-first, AI-assisted, Pastor-finalized Sermon Research System**
 
@@ -145,7 +145,7 @@ ollama pull qwen3:1.7b
 Claude deep research를 사용할 때만 API 키를 환경 변수로 설정합니다.
 
 ```powershell
-$env:ANTHROPIC_API_KEY = "sk-ant-..."
+$env:ANTHROPIC_API_KEY = "<ANTHROPIC_API_KEY>"
 ```
 
 `.env`, API 키, 토큰은 커밋하지 않습니다.
@@ -176,13 +176,17 @@ sermon-workflows/
    ├─ 02-logos-capture-checklist.md
    ├─ 03-logos-coverage-report.md
    ├─ 04-capture-quality-report.md
-   ├─ deep-research.md
-   ├─ final-direction.md
-   ├─ sermon-final.md
-   ├─ sermon-delivery-compression.md
-   ├─ ppt-outline-preaching.md
-   ├─ small-group-guide-member.md
-   └─ rehearsal-guide.md
+   ├─ 05-logos-integration-summary.md
+   ├─ 06-research-context.md
+   ├─ 07-deep-research.md
+   ├─ 08-final-direction.md
+   ├─ 09-pulpit-debrief.md
+   └─ v1/
+      ├─ sermon-final.md
+      ├─ sermon-delivery-compression.md
+      ├─ ppt-outline-preaching.md
+      ├─ small-group-guide-member.md
+      └─ rehearsal-guide.md
 ```
 
 ## 보안과 보존 원칙
@@ -213,3 +217,4 @@ git pull
 - `docs/troubleshooting.md`
 - `docs/logos_max_workflow.md`
 - `SETUP.md`
+

@@ -1,4 +1,4 @@
-# Logos-Max 본문중심 연구 자동화 — 전체 워크플로우
+﻿# Logos-Max 본문중심 연구 자동화 — 전체 워크플로우
 
 ## 시스템 개요
 
@@ -76,7 +76,7 @@ python scripts\run_local_research_with_ollama.py ^
 ### 5단계: Claude 심층 연구
 
 ```powershell
-$env:ANTHROPIC_API_KEY = "sk-ant-..."
+$env:ANTHROPIC_API_KEY = "<ANTHROPIC_API_KEY>"
 python scripts\run_deep_research_with_claude.py ^
   --passage "요한복음 13:14" ^
   --mode deep ^
@@ -191,3 +191,4 @@ sermon-workflows/
     ├── local_research/                ← Ollama 1차 분석
     └── final_sermon_direction/        ← 최종 설교 방향
 ```
+

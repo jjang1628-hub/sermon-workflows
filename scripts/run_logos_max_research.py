@@ -1,4 +1,4 @@
-"""
+﻿"""
 run_logos_max_research.py — Logos-Max 마스터 오케스트레이터
 
 7단계 자동화 흐름을 실행하는 마스터 스크립트.
@@ -39,35 +39,8 @@ if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 
-def slugify(passage: str) -> str:
-    table = {
-        "창세기": "ge", "출애굽기": "ex", "레위기": "le", "민수기": "nu",
-        "신명기": "dt", "여호수아": "jos", "사사기": "jdg", "룻기": "ru",
-        "사무엘상": "1sa", "사무엘하": "2sa", "열왕기상": "1ki", "열왕기하": "2ki",
-        "역대상": "1ch", "역대하": "2ch", "에스라": "ezr", "느헤미야": "ne",
-        "에스더": "est", "욥기": "job", "시편": "ps", "잠언": "pr",
-        "전도서": "ec", "아가": "ss", "이사야": "is", "예레미야": "je",
-        "예레미야애가": "la", "에스겔": "eze", "다니엘": "da", "호세아": "ho",
-        "요엘": "joe", "아모스": "am", "오바댜": "ob", "요나": "jon",
-        "미가": "mic", "나훔": "na", "하박국": "hab", "스바냐": "zep",
-        "학개": "hag", "스가랴": "zec", "말라기": "mal",
-        "마태복음": "mt", "마가복음": "mk", "누가복음": "lk", "요한복음": "jn",
-        "사도행전": "ac", "로마서": "ro", "고린도전서": "1co", "고린도후서": "2co",
-        "갈라디아서": "ga", "에베소서": "eph", "빌립보서": "php", "골로새서": "col",
-        "데살로니가전서": "1th", "데살로니가후서": "2th", "디모데전서": "1ti",
-        "디모데후서": "2ti", "디도서": "tit", "빌레몬서": "phm", "히브리서": "heb",
-        "야고보서": "jas", "베드로전서": "1pe", "베드로후서": "2pe",
-        "요한일서": "1jn", "요한이서": "2jn", "요한삼서": "3jn",
-        "유다서": "jude", "요한계시록": "re",
-    }
-    slug = passage
-    for korean, abbr in table.items():
-        if korean in passage:
-            slug = passage.replace(korean, abbr)
-            break
-    slug = re.sub(r"[:\s]+", "-", slug)
-    slug = re.sub(r"[^a-zA-Z0-9\-]", "", slug)
-    return slug.strip("-").lower() or "passage"
+import sys as _sys; _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+from pipeline_utils import slugify_passage as slugify  # noqa: E402
 
 
 def run_step(label: str, cmd: list[str], optional: bool = False) -> tuple[bool, str]:
@@ -134,6 +107,8 @@ def main() -> int:
     parser.add_argument("--skip-ollama", action="store_true", help="Ollama 1차 분석 건너뛰기")
     parser.add_argument("--skip-deep", action="store_true", help="Claude 심층 연구 건너뛰기")
     parser.add_argument("--skip-audit", action="store_true", help="감사 단계 건너뛰기")
+    parser.add_argument("--research-context", default=None,
+                        help="v2.1 Research Context 파일 경로 (06-research-context.md)")
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 
@@ -281,7 +256,7 @@ def main() -> int:
         if not api_key:
             print(f"\n{'─'*50}")
             print("⚠️ 5단계: ANTHROPIC_API_KEY 없음 — Claude 심층 연구 건너뜀")
-            print("   $env:ANTHROPIC_API_KEY = 'sk-ant-...' 설정 후 재실행")
+            print("   $env:ANTHROPIC_API_KEY = '<ANTHROPIC_API_KEY>' 설정 후 재실행")
             steps_failed.append("Claude 심층 (API 키 없음)")
         else:
             pack_flags = []
@@ -289,6 +264,11 @@ def main() -> int:
                 pack_flags = ["--research-pack", str(research_pack_path)]
             elif capture_path and capture_path.exists():
                 pack_flags = ["--logos-capture", str(capture_path)]
+
+            # v2.1 Research Context 주입 (있으면 강도 지도 포함)
+            context_flags: list[str] = []
+            if args.research_context and Path(args.research_context).exists():
+                context_flags = ["--research-context", args.research_context]
 
             ok, _ = run_step(
                 "5단계: Claude 심층 연구 (20-Pass)",
@@ -298,6 +278,7 @@ def main() -> int:
                  "--model", args.model]
                 + pack_flags
                 + ollama_critique_flags   # Ollama 실패 목록 전달
+                + context_flags           # v2.1 강도 지도 주입
                 + force_flag,
             )
             if ok:
@@ -426,3 +407,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

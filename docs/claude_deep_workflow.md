@@ -1,4 +1,4 @@
-# Claude 심층 연구 워크플로우
+﻿# Claude 심층 연구 워크플로우
 
 ## 개요
 
@@ -78,7 +78,7 @@ Claude는 Logos-Max 시스템에서 20-Pass Multi-Pass Deep Research를 수행�
 
 ### 기본 실행
 ```powershell
-$env:ANTHROPIC_API_KEY = "sk-ant-..."
+$env:ANTHROPIC_API_KEY = "<ANTHROPIC_API_KEY>"
 python scripts\run_deep_research_with_claude.py `
   --passage "요한복음 13:14" `
   --mode standard
@@ -136,3 +136,4 @@ Claude는 다음을 하지 않는다:
 | Evidence Ledger | `output/evidence_ledgers/{slug}-evidence-ledger.md` |
 | Claim Audit | `output/claim_audits/{slug}-claim-audit.md` |
 | Counter-Reading | `output/deep_research/{slug}-counter-reading.md` |
+

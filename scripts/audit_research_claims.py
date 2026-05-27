@@ -1,4 +1,4 @@
-﻿"""
+"""
 audit_research_claims.py — Claim Audit 실행기 (12문항)
 
 Evidence Ledger의 주장들을 12개 감사 질문으로 검사한다.

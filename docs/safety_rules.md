@@ -1,4 +1,4 @@
-# 안전 규칙 (Safety Rules) — 불변 원칙
+﻿# 안전 규칙 (Safety Rules) — 불변 원칙
 
 이 문서는 `configs/safety_rules.yaml`의 인간 가독성 버전이다.
 모든 스크립트와 자동화 프로세스는 이 규칙을 따른다.
@@ -98,7 +98,7 @@ Deep/Expert 모드에서 counter-reading 파일이 없으면 완료 보고를 �
 ### ES-01: API 키 코드 하드코딩 금지
 ```python
 # 금지
-api_key = "sk-ant-api03-..."
+api_key = "<ANTHROPIC_API_KEY>"
 
 # 허용
 api_key = os.environ.get("ANTHROPIC_API_KEY", "")
@@ -133,3 +133,4 @@ output_path.parent.mkdir(parents=True, exist_ok=True)
 
 `configs/safety_rules.yaml`을 수정하고 이 문서를 함께 업데이트한다.
 규칙 완화는 신중하게 검토한다. "편의"를 위해 안전을 타협하지 않는다.
+

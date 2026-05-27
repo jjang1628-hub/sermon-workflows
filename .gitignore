@@ -1,6 +1,4 @@
-# ──────────────────────────────────────────────────────────────
-# sermon-workflows .gitignore — 95점 버전
-# ──────────────────────────────────────────────────────────────
+# sermon-workflows .gitignore
 
 # Python
 __pycache__/
@@ -16,7 +14,7 @@ __pycache__/
 venv/
 env/
 
-# Environment / secrets (절대 커밋 금지)
+# Environment / secrets
 .env
 .env.*
 *.pem
@@ -25,12 +23,14 @@ env/
 *credentials*
 *token*
 
-# Output / generated files (재생성 가능)
+# Output / generated files
 output/
 outputs/
 dist/
 build/
 .cache/
+reports/
+backups/
 
 # Temporary / scratch
 tmp/*.md
@@ -39,10 +39,9 @@ tmp/*.log
 tmp/prompts/
 tmp/slides/
 
-# ★ Logos 캡처 원본은 연구 자산 — 포함 유지
-# tmp/logos-capture/raw/**  → git에 포함
-# tmp/logos-capture/validated/**  → git에 포함
-# tmp/logos-capture/*.md (classification 등 생성물) → 제외 (위에서 처리)
+# Logos capture raw files are intentionally allowed for selected research assets:
+# tmp/logos-capture/raw/**
+# tmp/logos-capture/validated/**
 
 # Ollama / local model files
 .ollama/
@@ -58,6 +57,12 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+# Local PC performance diagnostics (not sermon workflow source)
+docs/windows-performance-optimization.md
+scripts/apply_safe_performance_profile.ps1
+scripts/check_windows_performance.ps1
+scripts/rollback_safe_performance_profile.ps1
 
 # Backup files
 *.bak

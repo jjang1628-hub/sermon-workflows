@@ -1,4 +1,4 @@
-﻿"""
+"""
 prepare_research_pack.py — 연구 팩 준비기
 
 Logos 캡처 파일들을 모아 11섹션 연구 팩을 생성한다.

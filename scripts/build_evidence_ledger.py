@@ -1,4 +1,4 @@
-﻿"""
+"""
 build_evidence_ledger.py — Evidence Ledger 생성기
 
 연구 보고서에서 주장을 추출하고 Evidence Ledger를 생성한다.

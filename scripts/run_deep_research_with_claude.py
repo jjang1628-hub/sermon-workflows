@@ -20,10 +20,23 @@ import json
 import os
 import re
 import shutil
+import sys
 import urllib.error
 import urllib.request
 from datetime import datetime
 from pathlib import Path
+
+# Windows cp949 환경에서 한글/특수문자 UnicodeEncodeError 방지
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+if hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
@@ -61,6 +74,8 @@ DEEP_RESEARCH_PROMPT = """\
 
 ## 연구 자료
 {research_content}
+
+{v21_brief}
 
 ## 20-Pass 프로토콜
 
@@ -164,6 +179,8 @@ DEEP_RESEARCH_PROMPT = """\
 ### 약점 및 주의사항
 ### 추가 연구 권장 사항
 ### 신뢰도 지도 요약
+
+{v21_calibration}
 """
 
 
@@ -247,16 +264,23 @@ def main() -> int:
     parser.add_argument("--logos-capture", default=None, help="Logos 캡처 파일 경로")
     parser.add_argument("--ollama-critique", default=None,
                         help="Ollama Quality Gate 결과 파일 — Ollama 1차 분석의 실패 항목을 Claude에게 전달")
+    parser.add_argument("--research-context", default=None,
+                        help="v2.1 Research Context 파일 경로 (06-research-context.md) — Coverage/Quality 강도 지도 주입")
     parser.add_argument("--output", default=None)
     parser.add_argument("--model", default="claude-opus-4-5")
     parser.add_argument("--prompts-dir", default="prompts")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument(
+        "--dry-run", action="store_true",
+        help="API 호출 없이 실제 전송될 프롬프트를 출력한다 (API 키 불필요)",
+    )
     args = parser.parse_args()
 
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key:
+    if not api_key and not args.dry_run:
         print("NG ANTHROPIC_API_KEY 환경변수가 설정되어 있지 않습니다.")
-        print("   $env:ANTHROPIC_API_KEY = 'sk-ant-...'")
+        print("   $env:ANTHROPIC_API_KEY = '<ANTHROPIC_API_KEY>'")
+        print("   (프롬프트 미리보기: --dry-run 플래그 사용)")
         return 1
 
     slug = slugify(args.passage)
@@ -266,24 +290,30 @@ def main() -> int:
     else:
         output_path = Path("output/deep_research") / f"{slug}-deep-research.md"
 
-    if output_path.exists() and not args.force:
+    if output_path.exists() and not args.force and not args.dry_run:
         print(f"NG 출력 파일이 이미 있습니다. --force 사용: {output_path}")
         return 1
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    # output 디렉터리 생성은 dry-run이 아닐 때만 (dry-run은 파일 시스템에 영향 없음)
+    if not args.dry_run:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # 연구 자료 로드
+    # 연구 자료 로드 (토큰 예산: brief ~1200자 + calibration ~2500자 = 여유 ~4300자)
+    # brief+calibration이 주입되면 research_content 한도를 줄여 총 입력을 8000자 이내로 유지
+    RESEARCH_CONTENT_LIMIT = 6000   # context 없을 때 기본 한도
+    RESEARCH_CONTENT_LIMIT_WITH_CTX = 4000   # context 주입 시 한도
+    # 실제 한도는 context 파일 로드 후 결정하므로 우선 6000으로 로드
     research_content = ""
     if args.research_pack and Path(args.research_pack).exists():
         raw = Path(args.research_pack).read_text(encoding="utf-8", errors="replace")
-        research_content = raw[:8000]
+        research_content = raw[:RESEARCH_CONTENT_LIMIT]
         print(f"OK 연구 팩 로드: {args.research_pack} ({len(research_content)}자)")
     elif args.logos_capture and Path(args.logos_capture).exists():
         raw = Path(args.logos_capture).read_text(encoding="utf-8", errors="replace")
-        research_content = raw[:8000]
+        research_content = raw[:RESEARCH_CONTENT_LIMIT]
         print(f"OK Logos 캡처 로드: {args.logos_capture} ({len(research_content)}자)")
     else:
-        print("OK 연구 자료 없음 — 본문 정보만으로 분석합니다")
+        print("OK 연구 자료 없음 - 본문 정보만으로 분석합니다")
 
     # Ollama Quality Gate 결과 로드 (있으면 프롬프트에 포함)
     ollama_critique_section = ""
@@ -296,6 +326,37 @@ def main() -> int:
             + critique_raw
         )
         print(f"OK Ollama 비판 로드: {args.ollama_critique}")
+
+    # v2.1 Research Context 로드 — BRIEF(전) + CALIBRATION(후) 분리 주입
+    v21_brief_section = ""
+    v21_calibration_section = ""
+    CALIBRATION_MARKER = "<!-- V21_CALIBRATION_START -->"
+
+    if args.research_context and Path(args.research_context).exists():
+        ctx_raw = Path(args.research_context).read_text(encoding="utf-8", errors="replace")
+        if CALIBRATION_MARKER in ctx_raw:
+            brief_part, cal_part = ctx_raw.split(CALIBRATION_MARKER, 1)
+            # 파일 헤더 제거: "# Title" 줄과 "> 메타데이터" 줄은 파일용이지 프롬프트용이 아님
+            import re as _re
+            brief_clean = _re.sub(r"^# [^\n]+\n+(?:>[^\n]+\n+)*", "", brief_part.strip())
+            v21_brief_section = brief_clean.strip()
+            v21_calibration_section = cal_part.strip()
+        else:
+            # 구버전 파일: 헤더 제거 후 전체를 brief 구역에 주입
+            import re as _re
+            brief_clean = _re.sub(r"^# [^\n]+\n+(?:>[^\n]+\n+)*", "", ctx_raw.strip())
+            v21_brief_section = brief_clean.strip()
+
+        print(
+            f"OK v2.1 컨텍스트 로드: {args.research_context} "
+            f"(brief {len(v21_brief_section)}자 | calibration {len(v21_calibration_section)}자)"
+        )
+        # context가 있으면 research_content 한도를 줄여 총 입력 예산 보호
+        if research_content and len(research_content) > RESEARCH_CONTENT_LIMIT_WITH_CTX:
+            research_content = research_content[:RESEARCH_CONTENT_LIMIT_WITH_CTX]
+            print(f"OK 연구 자료 한도 조정: {RESEARCH_CONTENT_LIMIT_WITH_CTX}자 (context 주입으로 공간 확보)")
+    else:
+        print("OK v2.1 컨텍스트 없음 - 표준 프롬프트로 진행")
 
     # 시스템 프롬프트 로드
     prompts_dir = Path(args.prompts_dir)
@@ -312,10 +373,37 @@ def main() -> int:
     prompt = DEEP_RESEARCH_PROMPT.format(
         passage=args.passage,
         research_content=research_section,
+        v21_brief=v21_brief_section,
+        v21_calibration=v21_calibration_section,
         timestamp=timestamp,
         model=args.model,
         mode=args.mode.upper(),
     )
+
+    # ── dry-run: API 호출 없이 프롬프트만 출력 ─────────────────────────────────
+    if args.dry_run:
+        total_chars = len(system) + len(prompt)
+        token_est = total_chars // 4  # 한국어 포함 시 대략 4자/토큰
+        sep = "=" * 60
+        print(f"\n{sep}")
+        print(f"  DRY-RUN - 실제 API 호출 없음")
+        print(f"  본문: {args.passage} | 모델: {args.model} | 모드: {args.mode.upper()}")
+        print(f"  시스템 프롬프트: {len(system):,}자")
+        print(f"  사용자 프롬프트: {len(prompt):,}자")
+        print(f"  총 입력: {total_chars:,}자 (~{token_est:,} 토큰 추정)")
+        print(sep)
+        print("\n[ 시스템 프롬프트 미리보기 - 처음 500자 ]\n")
+        print(system[:500])
+        print("\n... (생략) ...\n")
+        print(f"[ 사용자 프롬프트 미리보기 - 처음 2000자 ]\n")
+        print(prompt[:2000])
+        if len(prompt) > 2000:
+            print(f"\n... (이하 {len(prompt)-2000:,}자 생략) ...")
+        print(f"\n{sep}")
+        print(f"  API 호출: 건너뜀")
+        print(f"  실제 실행: ANTHROPIC_API_KEY 설정 후 --dry-run 제거")
+        print(sep)
+        return 0
 
     print(f"\n{'='*50}")
     print(f"Claude 심층 연구: {args.passage} / {args.mode.upper()}")
@@ -347,3 +435,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

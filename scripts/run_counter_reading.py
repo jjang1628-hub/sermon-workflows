@@ -1,4 +1,4 @@
-﻿"""
+"""
 run_counter_reading.py — Counter-Reading 생성기 (8관점)
 
 연구 보고서에 대한 반론을 8개 관점에서 생성한다.

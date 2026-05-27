@@ -1,4 +1,4 @@
-﻿"""
+"""
 recommend_logos_research_recipe.py — Logos 연구 레시피 추천기
 
 성경 본문과 운영 모드를 입력받아 어떤 Logos 도구를 어떤 순서로
