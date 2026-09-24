@@ -132,12 +132,26 @@ RESEARCH_PROMPT_TEMPLATE = """\
 """
 
 
-def check_ollama_available() -> tuple[bool, str]:
-    try:
+# 모델을 메모리에 유지하는 시간 — 반복 실행 시 cold load(수십 초) 방지
+OLLAMA_KEEP_ALIVE = "30m"
+
+_models_cache: list[str] | None = None
+
+
+def _fetch_models() -> list[str]:
+    """/api/tags를 한 번만 호출하고 결과를 재사용한다."""
+    global _models_cache
+    if _models_cache is None:
         req = urllib.request.Request(f"{OLLAMA_BASE_URL}/api/tags")
         with urllib.request.urlopen(req, timeout=5) as resp:
             data = json.loads(resp.read())
-        models = [m["name"] for m in data.get("models", [])]
+        _models_cache = [m["name"] for m in data.get("models", [])]
+    return _models_cache
+
+
+def check_ollama_available() -> tuple[bool, str]:
+    try:
+        models = _fetch_models()
         return True, "Ollama 서버 실행 중. 모델 목록: " + (", ".join(models) if models else "(없음)")
     except urllib.error.URLError:
         return False, "Ollama 서버에 연결할 수 없습니다. 'ollama serve' 또는 Ollama 앱을 실행하세요."
@@ -147,10 +161,7 @@ def check_ollama_available() -> tuple[bool, str]:
 
 def list_ollama_models() -> list[str]:
     try:
-        req = urllib.request.Request(f"{OLLAMA_BASE_URL}/api/tags")
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            data = json.loads(resp.read())
-        return [m["name"] for m in data.get("models", [])]
+        return _fetch_models()
     except Exception:
         return []
 
@@ -165,6 +176,7 @@ def run_ollama_generate(model: str, system: str, prompt: str) -> str:
         "system": system,
         "prompt": prompt,
         "stream": True,
+        "keep_alive": OLLAMA_KEEP_ALIVE,
         "options": {
             "temperature": 0.3,
             "num_predict": 4096,
