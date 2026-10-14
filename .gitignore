@@ -67,3 +67,6 @@ scripts/rollback_safe_performance_profile.ps1
 # Backup files
 *.bak
 *.backup
+
+# MarkItDown 변환 결과
+tmp/markitdown/
