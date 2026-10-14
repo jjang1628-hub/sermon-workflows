@@ -2,6 +2,7 @@
 # 설치: pip install -r requirements.txt
 
 anthropic>=0.103.0   # Claude API (Step 5 심층 연구용)
+markitdown[pdf,docx,pptx,xlsx]>=0.1.7   # 문서(PDF/DOCX/PPTX/XLSX) → Markdown 변환 (scripts/md_convert.py)
 
 # 아래는 pip 설치 불필요 — 별도 설치
 # Ollama: https://ollama.com (로컬 LLM 서버, Step 4용)
